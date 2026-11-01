@@ -56,7 +56,7 @@ Your starting building changes with your vehicle: the hospital, the police depar
 
 Your pills, unlocks, upgrades, best distances and calls are saved in your browser. Saves from the first version (pills, ambulance upgrades and best distance) carry over automatically.
 
-**Start over:** in the garage, open the **Calls** tab and press **Reset all progress** at the bottom. After you confirm, the game goes back to how it was on the very first launch (0 pills, only the ambulance and City General). Your sound and music settings are kept. The save lives in each browser separately, so resetting on one computer doesn't affect another.
+**Start over:** press **Reset all progress** at the bottom of the garage, under the Drive button. This isn't the same as **Restart run** in the pause menu, which only restarts the current drive. After you confirm, the game goes back to how it was on the very first launch (0 pills, only the ambulance and City General). Your sound and music settings are kept. The save lives in each browser separately, so resetting on one computer doesn't affect another.
 
 ## Run it
 
