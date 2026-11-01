@@ -20,23 +20,33 @@ In the garage, press `D` or `Enter` to start driving.
 
 ## Crashes
 
-Flipping is part of the fun. A run only ends when:
+Flips are fine as long as you don't land on the driver. A run ends when:
 
-- **The driver is injured.** Each vehicle has a small head zone on the roof above the driver. If it hits the ground hard (faster than 5.5 m/s), the driver is hurt and the run ends. Full flips, roof scrapes and gentle roof landings are all fine. The ambulance's tall patient box shields its cab, so it can land flat on its roof without hurting the driver.
-- **You stay flipped or stuck.** If the vehicle is on its side or roof, or wedged with no wheels down, and isn't moving, a 4-second countdown appears. Tilt with `←` / `→` to roll back onto your wheels before it runs out.
+- **The driver's head hits the ground.** Each vehicle has a head zone on the roof right above the driver. If the ground touches it, at any speed, the run is over. In practice, landing roughly upside down (from about 135° to 240° of rotation) is fatal for all three vehicles. Landing on the wheels, the nose or the tail is survivable.
+- **You stay flipped or stuck.** If the vehicle is on its side or tail, or wedged with no wheels down, and isn't moving, a 4-second countdown appears. Tilt with `←` / `→` to roll back onto your wheels before it runs out.
 - **The tank runs dry** before the next refill.
 
 ## Vehicles
 
-All three vehicles have the same four upgrades (Engine, Suspension, Tires, Tank), with 10 levels each. Every vehicle keeps its own upgrade levels.
+All three vehicles have the same four upgrades (Engine, Suspension, Tires, Tank), with 10 levels each. Every vehicle keeps its own upgrade levels. They drive very differently:
 
-| Key | Vehicle | Runs on | What makes it different |
+| Key | Vehicle | Class | Runs on | How it drives | Special |
+|---|---|---|---|---|---|
+| `1` | **Ambulance** | All-rounder | Oxygen | Balanced speed, grip, fuel and air control. | **Reserve O₂:** once per run, a backup tank refills 30% when you run dry. A patient heart-rate gauge spikes on hard bumps. |
+| `2` | **Police Cruiser** | Speedster | Fuel | Light and low. Fastest top speed and the quickest flips, but bouncy, slips on steep hills and has the smallest tank. | **Nitro:** hold the ability key for a burst of speed that also works in the air. It recharges as you drive. |
+| `3` | **Fire Engine** | Heavy hauler | Fuel | Long, heavy, three axles. Slow, but climbs the steepest hills, grips the best, carries the most fuel and barely bounces. Rotates slowly in the air. | **Water cannon:** hold the ability key to spray. Put out brush fires on the road for bonus pills. |
+
+How they measure with no upgrades and fully upgraded (level 10):
+
+| | Ambulance | Police Cruiser | Fire Engine |
 |---|---|---|---|
-| `1` | **Ambulance** | Oxygen | Balanced. **Reserve O₂:** once per run, a backup tank refills 30% when you run dry. A patient heart-rate gauge spikes on hard bumps. |
-| `2` | **Police Cruiser** | Fuel | Low, light and fast. **Nitro:** hold the ability key for a burst of speed that also works in the air. It recharges as you drive. |
-| `3` | **Fire Engine** | Fuel | Long, heavy, three axles, lots of torque. **Water cannon:** hold the ability key to spray. Put out brush fires on the road for bonus pills. |
+| Top speed | 33 → 81 km/h | 49 → 117 km/h | 25 → 59 km/h |
+| Steepest climb (no upgrades) | 40° | 36° | 46° |
+| Spin in 1 s of air tilt | 264° | 351° | 162° |
+| Tank | 34 → 104 s | 28 → 78 s | 44 → 124 s |
+| Weight | medium | light | heaviest |
 
-Upgrades cost a bit more for the police cruiser (×1.2) and the fire engine (×1.4).
+The garage's Vehicles tab shows Speed, Power, Grip, Tank, Air and Weight bars for each one, and they grow as you upgrade. Upgrades cost a bit more for the police cruiser (×1.2) and the fire engine (×1.4).
 
 ## Maps
 

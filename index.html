@@ -670,15 +670,17 @@
     {
       id: "ambulance", name: "Ambulance", noun: "ambulance", costMul: 1, icon: "v-ambulance",
       res: "o2", ability: null, gauge: "hr",
+      role: "All-rounder", traits: "Balanced speed, grip, fuel and air control. A good first pick on any map.",
       perk: "<b>Reserve O₂:</b> once per run, a backup tank kicks in when you run dry.",
       st: { torque: [15, 3.6], speed: [22, 3.2], hz: [2.5, 0.32], damp: [0.42, 0.04], grip: [0.9, 0.1], tank: [34, 7] },
+      tilt: [3.2, 11], spin: 7,                                                         // tilt torque on the ground / in the air, max air spin (rad/s)
       wheelR: 0.42, wheelY: -0.42, wheels: [-0.95, 1.02], zoom: 1,
       parts: [
         { box: [1.48, 0.13, 0.02, -0.09], d: 3.0 },                                     // floor pan (heavy, keeps CoM low)
         { box: [1.05, 0.55, -0.5, 0.5], d: 0.45 },                                      // patient box
         { box: [0.52, 0.235, 1.07, 0.185], d: 2.2 },                                    // hood (engine block keeps the nose down)
         { poly: [[0.55, 0.42], [1.25, 0.42], [0.96, 0.86], [0.55, 0.86]], d: 0.4 },     // cab
-        { box: [0.2, 0.06, 0.76, 0.9], head: true },                                    // driver's head: a hard knock here ends the run
+        { box: [0.21, 0.14, 0.77, 0.98], head: true },                                  // driver's head: if this touches the ground, the run ends
       ],
       exhaust: [-1.66, -0.12], headlight: [1.6, 0.26], taillight: [-1.6, 0.57], beacons: [[0.15, 1.16], [0.43, 1.16]],
       siren: { type: "triangle", f: 960, depth: 360, rate: 0.34, cutoff: 3000 },
@@ -687,15 +689,17 @@
     {
       id: "police", name: "Police Cruiser", noun: "police cruiser", costMul: 1.2, icon: "v-police",
       res: "fuel", ability: "nitro", gauge: "nitro",
+      role: "Speedster", traits: "Fastest top speed and the quickest flips, but it's light, bouncy, slips on steep hills and burns fuel fast.",
       perk: "<b>Nitro:</b> hold <b>W</b> or the blue button for a burst of speed. It recharges as you drive.",
-      st: { torque: [12, 2.9], speed: [28, 3.8], hz: [3.0, 0.34], damp: [0.45, 0.04], grip: [0.85, 0.1], tank: [30, 6] },
+      st: { torque: [11, 2.6], speed: [36, 5.0], hz: [3.4, 0.35], damp: [0.3, 0.03], grip: [0.55, 0.1], tank: [28, 5] },
+      tilt: [4.5, 15], spin: 9,
       wheelR: 0.38, wheelY: -0.36, wheels: [-1.02, 1.08], zoom: 1,
       parts: [
-        { box: [1.55, 0.12, 0.03, -0.08], d: 3.2 },                                     // floor pan
-        { box: [1.6, 0.2, 0.03, 0.18], d: 0.5 },                                        // lower body
-        { box: [0.4, 0.12, 1.15, 0.2], d: 2.0 },                                        // engine block
-        { poly: [[-1.0, 0.38], [0.78, 0.38], [0.32, 0.84], [-0.62, 0.84]], d: 0.3 },    // cabin
-        { box: [0.22, 0.06, 0.12, 0.88], head: true },
+        { box: [1.55, 0.12, 0.03, -0.08], d: 2.3 },                                     // floor pan
+        { box: [1.6, 0.2, 0.03, 0.18], d: 0.35 },                                       // lower body
+        { box: [0.4, 0.12, 1.15, 0.2], d: 1.5 },                                        // engine block
+        { poly: [[-1.0, 0.38], [0.78, 0.38], [0.32, 0.84], [-0.62, 0.84]], d: 0.25 },   // cabin
+        { box: [0.26, 0.07, 0.1, 0.89], head: true },
       ],
       exhaust: [-1.66, -0.1], headlight: [1.66, 0.25], taillight: [-1.62, 0.34], beacons: [[-0.33, 0.95], [0.03, 0.95]],
       siren: { type: "square", f: 1050, depth: 430, rate: 3.6, cutoff: 2400 },
@@ -704,15 +708,17 @@
     {
       id: "fire", name: "Fire Engine", noun: "fire engine", costMul: 1.4, icon: "v-fire",
       res: "fuel", ability: "water", gauge: "water",
+      role: "Heavy hauler", traits: "Slow, but it climbs almost anything, grips the best, carries the most fuel and barely bounces. Turns slowly in the air.",
       perk: "<b>Water cannon:</b> hold <b>W</b> or the blue button to spray. Put out fires on the road for bonus pills.",
-      st: { torque: [16, 3.5], speed: [19, 2.7], hz: [2.3, 0.3], damp: [0.45, 0.04], grip: [0.95, 0.1], tank: [40, 7] },
+      st: { torque: [24, 4.6], speed: [15.5, 2.1], hz: [1.9, 0.25], damp: [0.55, 0.04], grip: [1.25, 0.1], tank: [44, 8] },
+      tilt: [2.0, 6.5], spin: 4.5,
       wheelR: 0.45, wheelY: -0.45, wheels: [-1.42, -0.52, 1.5], zoom: 0.88,
       parts: [
-        { box: [2.05, 0.15, 0.02, -0.08], d: 3.0 },                                     // floor pan
-        { box: [1.36, 0.56, -0.69, 0.5], d: 0.35 },                                     // equipment body
-        { box: [0.7, 0.63, 1.42, 0.57], d: 0.55 },                                      // cab
-        { box: [1.3, 0.09, -0.75, 1.2], d: 0.2 },                                       // ladder
-        { box: [0.25, 0.06, 1.65, 1.24], head: true },
+        { box: [2.05, 0.15, 0.02, -0.08], d: 4.4 },                                     // floor pan (water tank and pumps)
+        { box: [1.36, 0.56, -0.69, 0.5], d: 0.5 },                                      // equipment body
+        { box: [0.7, 0.63, 1.42, 0.57], d: 0.7 },                                       // cab
+        { box: [1.3, 0.09, -0.75, 1.2], d: 0.3 },                                       // ladder
+        { box: [0.32, 0.07, 1.62, 1.26], head: true },
       ],
       exhaust: [-2.12, -0.1], headlight: [2.12, 0.3], taillight: [-2.06, 0.5], beacons: [[1.62, 1.27], [1.94, 1.27]],
       nozzle: [1.52, 1.41], nozzleAngle: 0.2,
@@ -1055,8 +1061,9 @@
       inertia += b.getMass() * lx * lx;
       return { b, j, lx, touch: true };
     });
-    st.tiltAir = inertia * 11;
-    st.tiltGround = inertia * 3.2;
+    st.tiltGround = inertia * v.tilt[0];
+    st.tiltAir = inertia * v.tilt[1];
+    st.tiltRecover = inertia * 22;     // lying on its side or roof, every vehicle gets the same push to roll back over
     st.mass = ch.getMass() + wheels.reduce((s, w) => s + w.b.getMass(), 0);
     return { v, chassis: ch, wheels, rear: wheels[0].b, front: wheels[wheels.length - 1].b, stats: st, grounded: true, rearTouch: true, frontTouch: true, headTouch: false, bodyTouch: false };
   }
@@ -1105,7 +1112,6 @@
   let particles = [], popups = [], glows = [];
   const air = { on: false, t: 0, a0: 0, vy: 0 };
 
-  const HEAD_HIT = 5.5;      // m/s: how hard the driver's head can touch the ground before they're injured
   const STUCK_TIME = 4;      // s: how long you can sit tipped over or wedged before the run ends
 
   function newRun() {
@@ -1190,12 +1196,12 @@
     if (cause === "oxygen") return RES[VEH.res].cause;
     if (cause === "stuck") return ["Stuck!", `The ${n} got wedged and couldn't move.`];
     if (cause === "flipped") return ["Flipped over", `The ${n} stayed on its side or roof too long.`];
-    return ["Driver injured!", `The driver took a hard knock to the head when the ${n} came down on its roof.`];
+    return ["Driver injured!", `The ${n} landed on the roof right above the driver's head.`];
   }
   const TIPS = [
     "Use ← and → in the air to land on all four… well, both wheels.",
-    "Landed on your roof? You're fine. Tilt quickly to roll back before the countdown runs out.",
-    "Hard hits on the cab roof hurt the driver. Gentle roof landings don't.",
+    "Never land on the roof above the driver. That ends the run, even at low speed.",
+    "Tipped onto your side or tail? Tilt quickly to roll back before the countdown runs out.",
     "Ease off the gas on the way up steep hills, or you'll flip backwards.",
     "Refills get farther apart. A bigger tank buys you time.",
     "Better tires help you climb steep slopes, and they matter most on ice.",
@@ -1490,15 +1496,11 @@
       const dir = (input.back ? 1 : 0) - (input.fwd ? 1 : 0);
       if (dir) {
         const w = ch.getAngularVelocity();
-        // Lying on its side or roof, the tilt pushes twice as hard so even the fire engine can roll back over
-        const tq = car.grounded ? st.tiltGround : run && run.tipped && car.bodyTouch ? st.tiltAir * 2 : st.tiltAir;
-        if (dir * w < (car.grounded ? 4 : 7)) ch.applyTorque(dir * tq, true);
+        const tq = car.grounded ? st.tiltGround : run && run.tipped && car.bodyTouch ? st.tiltRecover : st.tiltAir;
+        if (dir * w < (car.grounded ? 4 : VEH.spin)) ch.applyTorque(dir * tq, true);
       }
     }
 
-    // Head speed just before the step: by the time a hit registers, the collision has already stopped the body
-    const headSpeed0 = (() => { const hv = ch.getLinearVelocityFromWorldPoint(ch.getWorldPoint(Vec2(VEH.head[0], VEH.head[1]))); return Math.hypot(hv.x, hv.y); })();
-    const headWas = car.headTouch;
     world.step(dt, 8, 3);
 
     for (const w of car.wheels) w.touch = touchingGround(w.b);
@@ -1506,7 +1508,6 @@
     car.rearTouch = car.wheels.slice(0, -1).some((w) => w.touch);
     car.grounded = car.rearTouch || car.frontTouch;
     car.headTouch = touchingGround(ch, "head");
-    car.headHit = car.headTouch ? (headWas ? 0 : headSpeed0) : 0;
     car.bodyTouch = touchingGround(ch, "body");
 
     // Water cannon
@@ -1539,11 +1540,9 @@
     if (state !== "drive") return;
     run.maxKmh = Math.max(run.maxKmh, spd * 3.6);
 
-    // Crashes. Flips and roof landings are survivable: only a hard knock to the driver's head ends the run.
-    if (car.headTouch) {
-      const hv = ch.getLinearVelocityFromWorldPoint(ch.getWorldPoint(Vec2(VEH.head[0], VEH.head[1])));
-      if (Math.max(car.headHit, Math.hypot(hv.x, hv.y)) > HEAD_HIT) { crash("injured"); return; }
-    }
+    // Crashes. Flips are fine as long as you land on the wheels or away from the driver:
+    // the moment the ground touches the roof above the driver's head, the run ends.
+    if (car.headTouch) { crash("injured"); return; }
     // Tipped over (or wedged with no wheels down) and not going anywhere: a countdown starts. Tilt to roll back.
     const slope = Math.atan2(groundY(p.x + 1) - groundY(p.x - 1), 2);
     run.tipped = Math.cos(ch.getAngle() - slope) < 0.35;
@@ -3270,7 +3269,7 @@
     });
   }
 
-  // Rough masses from the fixture list, for the "Power" bar
+  // Rough masses from the fixture list, for the "Weight" bar
   function estMass(v) {
     let m = 0;
     for (const p of v.parts) {
@@ -3282,9 +3281,11 @@
   }
   const BAR = {
     speed: (v, up) => sv(v, "speed", up.engine) * v.wheelR,
-    power: (v, up) => (sv(v, "torque", up.engine) * v.wheels.length) / v.wheelR / estMass(v),
+    power: (v, up) => (sv(v, "torque", up.engine) * v.wheels.length) / v.wheelR,   // pulling force at the wheels
     grip: (v, up) => sv(v, "grip", up.tires),
     tank: (v, up) => sv(v, "tank", up.tank),
+    air: (v) => v.tilt[1] * v.spin,
+    weight: (v) => estMass(v),
   };
   const MAXUP = { engine: MAX_LV, susp: MAX_LV, tires: MAX_LV, tank: MAX_LV };
   const barMax = {};
@@ -3397,12 +3398,12 @@
     // Vehicles
     $("veh-list").innerHTML = VEHICLES.map((c, i) => {
       const selected = c.id === v.id, u2 = save.ups[c.id];
-      const bars = [["Speed", "speed"], ["Power", "power"], ["Grip", "grip"], ["Tank", "tank"]]
+      const bars = [["Speed", "speed"], ["Power", "power"], ["Grip", "grip"], ["Tank", "tank"], ["Air", "air"], ["Weight", "weight"]]
         .map(([lab, k]) => `<span>${lab}</span><span class="bar"><i style="width:${Math.round((BAR[k](c, u2) / barMax[k]) * 100)}%"></i></span>`).join("");
       return `<article class="pick${selected ? " sel" : ""}" data-car="${c.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${c.name}">
         <div class="pick-art"><svg viewBox="0 0 64 32" aria-hidden="true"><use href="#${c.icon}"/></svg></div>
         <div><h3>${c.name}${selected ? ' <span class="badge">Selected</span>' : ""} <span class="key" title="Live swap key">${i + 1}</span></h3>
-          <p class="pick-perk">${c.perk}</p><div class="bars">${bars}</div></div>
+          <p class="pick-perk"><span class="mod">${c.role}</span> ${c.traits}</p><p class="pick-perk">${c.perk}</p><div class="bars">${bars}</div></div>
       </article>`;
     }).join("");
 
