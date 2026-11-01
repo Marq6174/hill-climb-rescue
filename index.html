@@ -164,7 +164,6 @@
   .help span { display: inline-flex; align-items: center; gap: 5px; }
   .btn-drive { font-size: 26px; padding: 14px 20px; width: 100%; }
   .btn-drive svg { width: 28px; height: 28px; }
-  .btn-drive:disabled { background: #b8c2cc; color: var(--white); text-shadow: none; cursor: not-allowed; }
 
   /* Garage tabs */
   .tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; background: #dfe5eb; border: 3px solid var(--ink); border-radius: 16px; padding: 5px; }
@@ -195,16 +194,13 @@
   .pick.flash { animation: flash 0.5s ease; }
   .pick-art { width: 96px; height: 52px; border-radius: 12px; background: #e8eef4; border: 2px solid rgba(20,33,43,0.2); display: grid; place-items: center; position: relative; overflow: hidden; }
   .pick-art svg { width: 86px; height: 43px; }
-  .pick.locked .pick-art svg { filter: grayscale(1) brightness(0.55); }
-  .pick-art .pick-lock, .picks.maps .pick-art .pick-lock { position: absolute; right: 4px; top: 4px; width: 22px; height: 22px; filter: none; }
   .pick h3 { margin: 0; font-family: var(--font-display); font-size: 16px; font-weight: 400; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .pick-perk { margin: 3px 0 0; font-size: 12.5px; font-weight: 800; color: var(--ink-soft); line-height: 1.3; }
   .pick-perk b { color: var(--ink); }
   .bars { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 8px; align-items: center; margin-top: 6px; font-size: 11px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
   .bar { height: 7px; border-radius: 4px; background: #dbe2ea; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--blue); border-radius: 4px; }
-  .pick .buy { margin-top: 2px; }
-  .buy.current { background: var(--white); cursor: default; }
+  .pick h3 .key { min-width: 22px; height: 22px; font-size: 12px; margin-left: auto; }
   .badge { font-family: var(--font-body); font-weight: 900; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--ink); color: var(--gold); }
   .picks.maps .pick { grid-template-columns: 1fr; padding: 8px; gap: 6px; }
   .picks.maps .pick-art { width: 100%; height: 64px; border-radius: 10px; }
@@ -383,7 +379,6 @@
   .r-calls li { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #d9f5e5; border: 2px solid var(--o2); border-radius: 10px; padding: 6px 10px; font-weight: 900; font-size: 13.5px; }
   .r-calls li b { display: flex; align-items: center; gap: 4px; font-family: var(--font-num); font-size: 15px; white-space: nowrap; }
   .r-calls .pill-ico { width: 18px; height: 18px; }
-  .r-next { margin: 0; font-size: 13px; font-weight: 900; color: var(--blue); text-align: center; }
 
   /* ---------- Pause ---------- */
   #paused { background: rgba(20,33,43,0.55); }
@@ -510,11 +505,11 @@
       <div class="cards" id="cards"></div>
     </div>
     <div class="panel" id="panel-vehicles" role="tabpanel" aria-labelledby="tab-vehicles" hidden>
-      <p class="g-sub">Choose your rescue vehicle</p>
+      <p class="g-sub">Choose your rescue vehicle · live keys 1–3</p>
       <div class="picks" id="veh-list"></div>
     </div>
     <div class="panel" id="panel-maps" role="tabpanel" aria-labelledby="tab-maps" hidden>
-      <p class="g-sub">Choose where to drive</p>
+      <p class="g-sub">Choose where to drive · live keys 4–8</p>
       <div class="picks maps" id="map-list"></div>
     </div>
     <div class="panel" id="panel-calls" role="tabpanel" aria-labelledby="tab-calls" hidden>
@@ -533,6 +528,7 @@
         <span><span class="key">H</span> siren</span>
         <span><span class="key">Esc</span> pause</span>
         <span><span class="key">M</span><span class="key">N</span> sound / music</span>
+        <span><span class="key">1</span>–<span class="key">8</span> <span class="key">V</span><span class="key">B</span> live swaps</span>
       </p>
       <p class="help" id="help-touch" hidden>Pedals drive and reverse. The round buttons tilt your vehicle. The blue button fires nitro or the water cannon.</p>
       <button class="btn btn-go btn-drive" id="btn-drive" type="button">Drive <svg viewBox="0 0 24 24"><use href="#i-go"/></svg></button>
@@ -549,7 +545,7 @@
     <div class="r-body">
       <h2 class="r-cause" id="r-cause">Rollover!</h2>
       <p class="r-cause-sub" id="r-cause-sub">The ambulance landed on its roof.</p>
-      <p class="r-meta"><span class="tag" id="r-map">City General</span><span class="tag" id="r-car">Ambulance</span></p>
+      <p class="r-meta"><span class="tag" id="r-map">City General</span><span class="tag" id="r-car">Ambulance</span><span class="tag" id="r-swaps" hidden></span></p>
       <dl class="r-rows">
         <div><dt>Distance</dt><dd><em class="newbest" id="r-newbest" hidden>New best</em><span id="r-dist">0 m</span></dd></div>
         <div><dt>Pills collected</dt><dd id="r-pills">0</dd></div>
@@ -561,7 +557,6 @@
       </dl>
       <ul class="r-calls" id="r-calls" hidden></ul>
       <div class="r-total"><span>Pills earned</span><b><svg class="pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pill"/></svg><span id="r-total">0</span></b></div>
-      <p class="r-next" id="r-next" hidden></p>
       <p class="r-tip" id="r-tip"></p>
     </div>
     <div class="r-actions">
@@ -589,7 +584,7 @@
 <section id="confirm-reset" class="screen" hidden aria-label="Reset progress">
   <div class="pause-card" role="alertdialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-desc">
     <h2 id="reset-title">Reset everything?</h2>
-    <p id="reset-desc">This wipes all pills, upgrades, unlocked vehicles and maps, best distances, dispatch calls and stats. The game starts over like the very first time.</p>
+    <p id="reset-desc">This wipes all pills, upgrades, best distances, dispatch calls and stats. The game starts over like the very first time.</p>
     <p class="danger-note">Your sound and music settings are kept. This can't be undone.</p>
     <button class="btn btn-go" id="btn-reset-yes" type="button">Reset everything</button>
     <button class="btn btn-ghost" id="btn-reset-no" type="button">Cancel</button>
@@ -620,7 +615,6 @@
     <symbol id="i-fuel" viewBox="0 0 32 32"><path d="M8 7h11l6 6v15a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" fill="currentColor" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M11 7V3.5h6V7" fill="none" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M10.5 14.5l9 9M19.5 14.5l-9 9" stroke="#14212b" stroke-width="2" stroke-linecap="round"/></symbol>
     <symbol id="i-nitro" viewBox="0 0 24 24"><path d="M13.5 2 5 13.5h6.2L10 22l9-12.2h-6.2z" fill="#ffc531" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/></symbol>
     <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 2.5C9 7 5.5 10.5 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10.5 15 7 12 2.5z" fill="#8fd3ff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M9 15a3 3 0 0 0 3 3" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#14212b" stroke-width="2.4"/><rect x="5" y="10.5" width="14" height="10" rx="2" fill="#ffc531" stroke="#14212b" stroke-width="2"/><circle cx="12" cy="15.5" r="1.6" fill="#14212b"/></symbol>
     <symbol id="v-ambulance" viewBox="0 0 64 32"><rect x="3" y="7" width="37" height="17" rx="2.5" fill="#fff" stroke="#14212b" stroke-width="2"/><path d="M40 11h8.5l7.5 7.5V24H40z" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M42.5 13h5l4.5 5h-9.5z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="4" y="18" width="51" height="3" fill="#e23b3b"/><path d="M17 9.5h3.2v3.2h3.2v3.2h-3.2v3.2H17v-3.2h-3.2v-3.2H17z" fill="#1f6fd1"/><rect x="29" y="3.5" width="5" height="3.5" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.2"/><rect x="34" y="3.5" width="5" height="3.5" rx="1" fill="#1f6fd1" stroke="#14212b" stroke-width="1.2"/><circle cx="13" cy="25" r="5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="13" cy="25" r="2" fill="#c9d2db"/><circle cx="48" cy="25" r="5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="48" cy="25" r="2" fill="#c9d2db"/></symbol>
     <symbol id="v-police" viewBox="0 0 64 32"><path d="M3.5 17.5 6 13.5h14l6-6h13.5l6.5 6h12.5q3 0 3 3.2v6H3.5z" fill="#1c2530" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="19" y="14" width="27" height="7.5" fill="#fff"/><path d="M27 9.5h12l4.5 4.5H22.5z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><path d="M32.5 15.4l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="#ffc531" stroke="#14212b" stroke-width=".6"/><rect x="27.5" y="4" width="5.5" height="3.5" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.2"/><rect x="33" y="4" width="5.5" height="3.5" rx="1" fill="#1f6fd1" stroke="#14212b" stroke-width="1.2"/><path d="M3.5 17.5 6 13.5h14l6-6h13.5l6.5 6h12.5q3 0 3 3.2v6H3.5z" fill="none" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="14" cy="24.5" r="4.6" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="14" cy="24.5" r="1.8" fill="#c9d2db"/><circle cx="50" cy="24.5" r="4.6" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="50" cy="24.5" r="1.8" fill="#c9d2db"/></symbol>
     <symbol id="v-fire" viewBox="0 0 64 32"><rect x="2.5" y="9" width="40" height="15" rx="2" fill="#d8312f" stroke="#14212b" stroke-width="2"/><path d="M42.5 7h13.5l5.5 6.5V24h-19z" fill="#d8312f" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M47 9.5h7.5l4 5H47z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="3.5" y="17" width="58" height="2.5" fill="#fff"/><rect x="3.5" y="19.5" width="58" height="1.2" fill="#ffc531"/><g stroke="#9aa6b1" stroke-width="1.6"><path d="M4 4.5h44M4 7.5h44"/><path d="M8 4.5v3M13 4.5v3M18 4.5v3M23 4.5v3M28 4.5v3M33 4.5v3M38 4.5v3M43 4.5v3" stroke-width="1.2"/></g><rect x="48" y="4" width="7" height="3" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.1"/><circle cx="11" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="11" cy="25" r="1.8" fill="#c9d2db"/><circle cx="22" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="22" cy="25" r="1.8" fill="#c9d2db"/><circle cx="53" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="53" cy="25" r="1.8" fill="#c9d2db"/></symbol>
@@ -674,7 +668,7 @@
   // st values are [base, per level]. parts are chassis fixtures in local metres (box: half-w, half-h, cx, cy).
   const VEHICLES = [
     {
-      id: "ambulance", name: "Ambulance", noun: "ambulance", cost: 0, costMul: 1, icon: "v-ambulance",
+      id: "ambulance", name: "Ambulance", noun: "ambulance", costMul: 1, icon: "v-ambulance",
       res: "o2", ability: null, gauge: "hr",
       perk: "<b>Reserve O₂:</b> once per run, a backup tank kicks in when you run dry.",
       st: { torque: [15, 3.6], speed: [22, 3.2], hz: [2.5, 0.32], damp: [0.42, 0.04], grip: [0.9, 0.1], tank: [34, 7] },
@@ -684,14 +678,14 @@
         { box: [1.05, 0.55, -0.5, 0.5], d: 0.45 },                                      // patient box
         { box: [0.52, 0.235, 1.07, 0.185], d: 2.2 },                                    // hood (engine block keeps the nose down)
         { poly: [[0.55, 0.42], [1.25, 0.42], [0.96, 0.86], [0.55, 0.86]], d: 0.4 },     // cab
-        { box: [1.1, 0.09, -0.48, 1.12], roof: true },                                  // roof: touching ground = rollover
+        { box: [0.2, 0.06, 0.76, 0.9], head: true },                                    // driver's head: a hard knock here ends the run
       ],
       exhaust: [-1.66, -0.12], headlight: [1.6, 0.26], taillight: [-1.6, 0.57], beacons: [[0.15, 1.16], [0.43, 1.16]],
       siren: { type: "triangle", f: 960, depth: 360, rate: 0.34, cutoff: 3000 },
       engine: { base: 36, range: 92, cutoff: 260, rumble: 0.05 },
     },
     {
-      id: "police", name: "Police Cruiser", noun: "police cruiser", cost: 4000, costMul: 1.2, icon: "v-police",
+      id: "police", name: "Police Cruiser", noun: "police cruiser", costMul: 1.2, icon: "v-police",
       res: "fuel", ability: "nitro", gauge: "nitro",
       perk: "<b>Nitro:</b> hold <b>W</b> or the blue button for a burst of speed. It recharges as you drive.",
       st: { torque: [12, 2.9], speed: [28, 3.8], hz: [3.0, 0.34], damp: [0.45, 0.04], grip: [0.85, 0.1], tank: [30, 6] },
@@ -701,14 +695,14 @@
         { box: [1.6, 0.2, 0.03, 0.18], d: 0.5 },                                        // lower body
         { box: [0.4, 0.12, 1.15, 0.2], d: 2.0 },                                        // engine block
         { poly: [[-1.0, 0.38], [0.78, 0.38], [0.32, 0.84], [-0.62, 0.84]], d: 0.3 },    // cabin
-        { box: [0.55, 0.08, -0.15, 0.92], roof: true },
+        { box: [0.22, 0.06, 0.12, 0.88], head: true },
       ],
       exhaust: [-1.66, -0.1], headlight: [1.66, 0.25], taillight: [-1.62, 0.34], beacons: [[-0.33, 0.95], [0.03, 0.95]],
       siren: { type: "square", f: 1050, depth: 430, rate: 3.6, cutoff: 2400 },
       engine: { base: 46, range: 122, cutoff: 340, rumble: 0.03 },
     },
     {
-      id: "fire", name: "Fire Engine", noun: "fire engine", cost: 9000, costMul: 1.4, icon: "v-fire",
+      id: "fire", name: "Fire Engine", noun: "fire engine", costMul: 1.4, icon: "v-fire",
       res: "fuel", ability: "water", gauge: "water",
       perk: "<b>Water cannon:</b> hold <b>W</b> or the blue button to spray. Put out fires on the road for bonus pills.",
       st: { torque: [16, 3.5], speed: [19, 2.7], hz: [2.3, 0.3], damp: [0.45, 0.04], grip: [0.95, 0.1], tank: [40, 7] },
@@ -718,8 +712,7 @@
         { box: [1.36, 0.56, -0.69, 0.5], d: 0.35 },                                     // equipment body
         { box: [0.7, 0.63, 1.42, 0.57], d: 0.55 },                                      // cab
         { box: [1.3, 0.09, -0.75, 1.2], d: 0.2 },                                       // ladder
-        { box: [1.3, 0.06, -0.75, 1.34], roof: true },
-        { box: [0.6, 0.06, 1.42, 1.27], roof: true },
+        { box: [0.25, 0.06, 1.65, 1.24], head: true },
       ],
       exhaust: [-2.12, -0.1], headlight: [2.12, 0.3], taillight: [-2.06, 0.5], beacons: [[1.62, 1.27], [1.94, 1.27]],
       nozzle: [1.52, 1.41], nozzleAngle: 0.2,
@@ -727,6 +720,7 @@
       engine: { base: 26, range: 64, cutoff: 200, rumble: 0.08 },
     },
   ];
+  for (const v of VEHICLES) { const h = v.parts.find((p) => p.head); v.head = [h.box[2], h.box[3]]; }
   const vehicleById = (id) => VEHICLES.find((v) => v.id === id) || VEHICLES[0];
 
   // What the vehicle burns: the ambulance runs on oxygen for the patient, the others on fuel
@@ -799,7 +793,7 @@
 
   const MAPS = [
     {
-      id: "city", name: "City General", cost: 0, seed: 20261024, pay: 1, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15,
+      id: "city", name: "City General", seed: 20261024, pay: 1, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15,
       o2: [190, 200, 32], fires: [70, 110, 90], music: [0, 108], lot: "#4b5661", station: "earth", town: "CITY", height: cityH,
       blurb: "From the hospital out to the night highway.", mods: [["Balanced", ""], ["Pills ×1", ""]],
       biomes: [
@@ -818,7 +812,7 @@
       ],
     },
     {
-      id: "desert", name: "Desert Canyon", cost: 2500, seed: 7331, pay: 1.25, gravity: -12, friction: 0.85, iceFriction: 0.3, maxSlope: 1.15,
+      id: "desert", name: "Desert Canyon", seed: 7331, pay: 1.25, gravity: -12, friction: 0.85, iceFriction: 0.3, maxSlope: 1.15,
       o2: [200, 210, 46], fires: [90, 140, 90], music: [-2, 100], lot: "#8a7a66", station: "earth", town: "CANYON", height: desertH,
       blurb: "Sand dunes with big jumps, then red canyons.", mods: [["Big jumps", "good"], ["Sandy grip", "hard"], ["Pills ×1.25", "good"]],
       biomes: [
@@ -837,7 +831,7 @@
       ],
     },
     {
-      id: "arctic", name: "Frozen Peaks", cost: 6000, seed: 4410, pay: 1.5, gravity: -12, friction: 0.9, iceFriction: 0.3, maxSlope: 1.15,
+      id: "arctic", name: "Frozen Peaks", seed: 4410, pay: 1.5, gravity: -12, friction: 0.9, iceFriction: 0.3, maxSlope: 1.15,
       o2: [180, 195, 30], fires: [110, 160, 100], music: [3, 104], lot: "#6d7c8c", station: "earth", town: "ALPINE", height: arcticH,
       blurb: "Steep snowy climbs and a slippery glacier.", mods: [["Steep climbs", "hard"], ["Icy glacier", "hard"], ["Pills ×1.5", "good"]],
       biomes: [
@@ -856,7 +850,7 @@
       ],
     },
     {
-      id: "volcano", name: "Volcano Ridge", cost: 12000, seed: 9091, pay: 2, gravity: -12, friction: 1.05, iceFriction: 0.3, maxSlope: 1.2,
+      id: "volcano", name: "Volcano Ridge", seed: 9091, pay: 2, gravity: -12, friction: 1.05, iceFriction: 0.3, maxSlope: 1.2,
       o2: [190, 200, 34], fires: [50, 55, 50], music: [-5, 118], lot: "#3e3a3a", station: "earth", town: "RIDGE", height: volcanoH,
       blurb: "Jagged rock, rivers of lava and fires everywhere.", mods: [["Jagged rocks", "hard"], ["Lots of fires", "good"], ["Pills ×2", "good"]],
       biomes: [
@@ -875,7 +869,7 @@
       ],
     },
     {
-      id: "moon", name: "Moon Base", cost: 20000, seed: 1969, pay: 2.5, gravity: -4.6, friction: 1.6, iceFriction: 0.3, maxSlope: 1.2,
+      id: "moon", name: "Moon Base", seed: 1969, pay: 2.5, gravity: -4.6, friction: 1.6, iceFriction: 0.3, maxSlope: 1.2,
       o2: [165, 180, 28], fires: null, beam: true, music: [5, 92], lot: "#5a5f6c", station: "moon", town: "MOON", height: moonH,
       blurb: "Low gravity, craters and enormous air time.", mods: [["Low gravity", "good"], ["Supply beams", "good"], ["Pills ×2.5", "good"]],
       biomes: [
@@ -916,20 +910,18 @@
   const save = {
     pills: 0, runs: 0, muted: false, music: true, car: "ambulance", map: "city", tab: "upgrades",
     ...loaded,
-    owned: { cars: ["ambulance"], maps: ["city"], ...(loaded.owned || {}) },
     ups: {}, best: {},
     stats: { dist: 0, flips: 0, fires: 0, air: 0, speed: 0, calls: 0, ...(loaded.stats || {}) },
     calls: { list: [], done: 0, seed: 1, skip: true, ...(loaded.calls || {}) },
   };
   for (const v of VEHICLES) save.ups[v.id] = { engine: 0, susp: 0, tires: 0, tank: 0, ...((loaded.ups || {})[v.id] || {}) };
   for (const m of MAPS) save.best[m.id] = (loaded.best || {})[m.id] || 0;
-  if (!save.owned.cars.includes(save.car)) save.car = "ambulance";
-  if (!save.owned.maps.includes(save.map)) save.map = "city";
+  delete save.owned;                     // older saves tracked unlocks; every vehicle and map is open now
+  save.car = vehicleById(save.car).id;
+  save.map = mapById(save.map).id;
   function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* storage blocked */ } }
-  const ownsCar = (id) => save.owned.cars.includes(id);
-  const ownsMap = (id) => save.owned.maps.includes(id);
 
-  // What the garage is showing (may be a locked vehicle or map being previewed)
+  // What the garage is showing and the next run will use
   const sel = { car: save.car, map: save.map };
   let VEH = vehicleById(sel.car);
   let MAP = mapById(sel.map);
@@ -1052,7 +1044,7 @@
     const ch = world.createBody({ type: "dynamic", position: Vec2(x, y), angularDamping: 0.15 });
     for (const p of v.parts) {
       const shape = p.poly ? Polygon(p.poly.map(([px, py]) => Vec2(px, py))) : Box(p.box[0], p.box[1], Vec2(p.box[2], p.box[3]));
-      ch.createFixture(shape, p.roof ? { isSensor: true, userData: "roof" } : { friction: 0.45, density: p.d, userData: "body" });
+      ch.createFixture(shape, p.head ? { isSensor: true, userData: "head" } : { friction: 0.45, density: p.d, userData: "body" });
     }
     const jdef = { enableMotor: true, motorSpeed: 0, maxMotorTorque: 60, frequencyHz: st.hz, dampingRatio: st.damp };
     let inertia = ch.getInertia();
@@ -1066,16 +1058,16 @@
     st.tiltAir = inertia * 11;
     st.tiltGround = inertia * 3.2;
     st.mass = ch.getMass() + wheels.reduce((s, w) => s + w.b.getMass(), 0);
-    return { v, chassis: ch, wheels, rear: wheels[0].b, front: wheels[wheels.length - 1].b, stats: st, grounded: true, rearTouch: true, frontTouch: true, roofTouch: false };
+    return { v, chassis: ch, wheels, rear: wheels[0].b, front: wheels[wheels.length - 1].b, stats: st, grounded: true, rearTouch: true, frontTouch: true, headTouch: false, bodyTouch: false };
   }
 
-  function newWorld() {
+  function newWorld(x = START_X) {
     world = World({ gravity: Vec2(0, MAP.gravity) });
     chunks = new Map();
     const wall = world.createBody({ type: "static" });
     wall.createFixture(Edge(Vec2(X0 + 4, -2), Vec2(X0 + 4, 40)), { friction: 0.2, userData: "wall" });
-    syncChunks(START_X);
-    car = makeCar(START_X, VEH);
+    syncChunks(x);
+    car = makeCar(x, VEH);
     prevPoses = null;
   }
 
@@ -1113,13 +1105,16 @@
   let particles = [], popups = [], glows = [];
   const air = { on: false, t: 0, a0: 0, vy: 0 };
 
+  const HEAD_HIT = 5.5;      // m/s: how hard the driver's head can touch the ground before they're injured
+  const STUCK_TIME = 4;      // s: how long you can sit tipped over or wedged before the run ends
+
   function newRun() {
     for (const p of pills) { p.got = false; p.gotAt = 0; }
     for (const o of o2s) { o.got = false; o.gotAt = 0; }
     for (const f of fires) { f.hp = 1; f.out = false; f.outAt = 0; }
     return {
       pills: 0, bonus: 0, flips: 0, maxAir: 0, dist: 0, refills: 0, fires: 0, maxKmh: 0, nitroTime: 0,
-      o2: car.stats.tank, tank: car.stats.tank, empty: 0, stuck: 0, reserve: VEH.id === "ambulance",
+      o2: car.stats.tank, tank: car.stats.tank, empty: 0, stuck: 0, tipped: false, reserve: VEH.id === "ambulance", reserveUsed: false, swaps: 0,
       ability: 1, abilityLock: false, boosting: false, spraying: false, sprayAcc: 0,
       biome: 0, cause: "", siren: false, sirenUntil: 0, nextMarker: 100,
       hr: 82, lastV: { x: 0, y: 0 }, lowBeep: 0, startedAt: realNow, callsAt: 0, callsDone: [],
@@ -1127,13 +1122,12 @@
   }
 
   function startRun() {
-    if (!ownsCar(sel.car) || !ownsMap(sel.map)) { audio(); sfx.deny(); return; }   // previewing something locked
     audio();
     if (save.car !== sel.car || save.map !== sel.map) { save.car = sel.car; save.map = sel.map; persist(); }
     newWorld();
     run = newRun();
     run.sirenUntil = realNow + 2.6;
-    particles = []; popups = [];
+    particles = []; popups = []; flash = 0; shake = 0;
     air.on = false;
     state = "drive";
     cam.snap = true;
@@ -1195,10 +1189,13 @@
     const n = VEH.noun;
     if (cause === "oxygen") return RES[VEH.res].cause;
     if (cause === "stuck") return ["Stuck!", `The ${n} got wedged and couldn't move.`];
-    return ["Rollover!", `The ${n} landed on its roof.`];
+    if (cause === "flipped") return ["Flipped over", `The ${n} stayed on its side or roof too long.`];
+    return ["Driver injured!", `The driver took a hard knock to the head when the ${n} came down on its roof.`];
   }
   const TIPS = [
     "Use ← and → in the air to land on all four… well, both wheels.",
+    "Landed on your roof? You're fine. Tilt quickly to roll back before the countdown runs out.",
+    "Hard hits on the cab roof hurt the driver. Gentle roof landings don't.",
     "Ease off the gas on the way up steep hills, or you'll flip backwards.",
     "Refills get farther apart. A bigger tank buys you time.",
     "Better tires help you climb steep slopes, and they matter most on ice.",
@@ -1253,9 +1250,8 @@
       list.appendChild(li);
     }
     list.hidden = !run.callsDone.length;
-    const goal = nextGoal();
-    $("r-next").hidden = !goal;
-    if (goal) $("r-next").textContent = goal;
+    $("r-swaps").hidden = !run.swaps;
+    $("r-swaps").textContent = `${run.swaps} viewer swap${run.swaps === 1 ? "" : "s"}`;
     $("r-tip").textContent = "Tip: " + TIPS[save.runs % TIPS.length];
     countUp($("r-total"), earned + callPills);
     $("hud").hidden = true;
@@ -1264,17 +1260,6 @@
     showScreen("results");
     sfx.report(isBest);
     updateMusicLevel(0.6);
-  }
-
-  // The cheapest locked vehicle or map, as a goal line on the report
-  function nextGoal() {
-    const locked = [
-      ...VEHICLES.filter((v) => !ownsCar(v.id)).map((v) => ({ name: `the ${v.name}`, cost: v.cost })),
-      ...MAPS.filter((m) => !ownsMap(m.id)).map((m) => ({ name: m.name, cost: m.cost })),
-    ].sort((a, b) => a.cost - b.cost);
-    if (!locked.length) return "";
-    const g = locked[0];
-    return save.pills >= g.cost ? `You can unlock ${g.name} in the garage!` : `${fmt(g.cost - save.pills)} more pills to unlock ${g.name}.`;
   }
 
   function countUp(el, to) {
@@ -1304,6 +1289,74 @@
     if (popups.length > 3) popups.shift();
   }
 
+  // ---------- Live swaps (TikTok LIVE and other stream tools) ----------
+  // Viewers can change the vehicle or the map in the middle of a run. Stream tools trigger it with keys
+  // (1–3 vehicle, 4–8 map, V / B next) or from a script through window.HillClimbRescue or postMessage.
+  // The run carries on from the same distance: same pills, same score, same fuel level.
+  const SWAP_COOLDOWN = 1.2;   // s between swaps, so a burst of gifts doesn't strobe the screen
+  let pendingSwap = null, lastSwapAt = -10;
+  function requestSwap(carId, mapId) {
+    const base = pendingSwap || { car: sel.car, map: sel.map };
+    const want = { car: carId || base.car, map: mapId || base.map };
+    if (state === "garage" || state === "results") {
+      if (want.car === sel.car && want.map === sel.map) return;
+      audio(); sfx.click();
+      setLoadout(want.car, want.map);
+      save.car = want.car; save.map = want.map; persist();
+      renderGarage();
+      return;
+    }
+    if (state === "drive" || state === "paused") pendingSwap = want;
+  }
+  const cycle = (list, id) => list[(list.findIndex((o) => o.id === id) + 1) % list.length].id;
+  const nextVehicle = () => requestSwap(cycle(VEHICLES, (pendingSwap || sel).car), null);
+  const nextMap = () => requestSwap(null, cycle(MAPS, (pendingSwap || sel).map));
+  function processSwaps() {
+    if (!pendingSwap) return;
+    if (state !== "drive" && state !== "paused") { pendingSwap = null; return; }
+    if (realNow - lastSwapAt >= SWAP_COOLDOWN) liveSwap(pendingSwap);
+  }
+  function liveSwap(sw) {
+    pendingSwap = null;
+    lastSwapAt = realNow;
+    const carChanged = sw.car !== VEH.id, mapChanged = sw.map !== MAP.id;
+    if (!carChanged && !mapChanged) return;
+    const ch = car.chassis, x = Math.max(START_X, ch.getPosition().x), vx = clamp(ch.getLinearVelocity().x, -4, 14);
+    const frac = run.tank > 0 ? run.o2 / run.tank : 1;
+    sel.car = sw.car; sel.map = sw.map; save.car = sw.car; save.map = sw.map; persist();
+    VEH = vehicleById(sw.car);
+    if (mapChanged) { MAP = mapById(sw.map); resetCourse(); genPickups(x + 120); }
+    newWorld(x);
+    // Keep rolling at the same speed in the new vehicle, on the new ground
+    for (const b of [car.chassis, ...car.wheels.map((w) => w.b)]) b.setLinearVelocity(Vec2(vx, 0));
+    for (const w of car.wheels) w.b.setAngularVelocity(-vx / VEH.wheelR);
+    run.tank = car.stats.tank; run.o2 = run.tank * frac;
+    run.reserve = VEH.id === "ambulance" && !run.reserveUsed;
+    run.ability = 1; run.abilityLock = false; run.boosting = false; run.spraying = false;
+    run.stuck = 0; run.tipped = false; run.lastV = { x: vx, y: 0 };
+    run.biome = dominantBiome(x);
+    run.swaps++;
+    air.on = false; particles = []; cam.snap = true;
+    setupDriveUi(); setVoices();
+    showBanner(mapChanged ? MAP.name : VEH.name, carChanged && mapChanged ? `Viewer swap · ${VEH.name}` : "Viewer swap!");
+    sfx.banner();
+  }
+  // Public hooks for stream overlays and bots
+  window.HillClimbRescue = {
+    vehicles: VEHICLES.map((v) => v.id), maps: MAPS.map((m) => m.id),
+    vehicle: (id) => { if (VEHICLES.some((v) => v.id === id)) requestSwap(id, null); },
+    map: (id) => { if (MAPS.some((m) => m.id === id)) requestSwap(null, id); },
+    nextVehicle, nextMap,
+  };
+  window.addEventListener("message", (e) => {
+    const d = e.data;
+    if (!d || d.type !== "hill-climb-rescue") return;
+    if (d.vehicle) window.HillClimbRescue.vehicle(d.vehicle);
+    if (d.map) window.HillClimbRescue.map(d.map);
+    if (d.next === "vehicle") nextVehicle();
+    if (d.next === "map") nextMap();
+  });
+
   // ---------- Dispatch calls (missions) ----------
   const CALLS = {
     dist: { tiers: [250, 400, 600, 850, 1200, 1600, 2200, 3000], text: (n) => `Drive ${fmt(n)} m in one run`, reward: (n) => n * 0.6, unit: " m" },
@@ -1315,27 +1368,20 @@
     refills: { tiers: [1, 2, 3, 4, 5, 6], text: (n) => `Grab ${n} tank refill${n > 1 ? "s" : ""} in one run`, reward: (n) => 60 + n * 100 },
     speed: { tiers: [40, 55, 70, 85, 100, 120], text: (n) => `Hit ${n} km/h`, reward: (n) => n * 4, unit: " km/h" },
     total: { tiers: [1500, 3000, 5000, 8000, 12000, 20000], text: (n) => `Drive ${fmt(n)} m in total`, reward: (n) => n * 0.12, unit: " m", total: true },
-    fires: { tiers: [1, 2, 3, 5, 8], text: (n) => `Put out ${n} fire${n > 1 ? "s" : ""} in one run`, reward: (n) => 80 + n * 90, needs: "fire" },
-    nitro: { tiers: [3, 6, 10, 15, 22], text: (n) => `Use ${n} s of nitro in one run`, reward: (n) => 60 + n * 30, unit: " s", dec: 1, needs: "police" },
+    fires: { tiers: [1, 2, 3, 5, 8], text: (n) => `Put out ${n} fire${n > 1 ? "s" : ""} in one run`, reward: (n) => 80 + n * 90 },
+    nitro: { tiers: [3, 6, 10, 15, 22], text: (n) => `Use ${n} s of nitro in one run`, reward: (n) => 60 + n * 30, unit: " s", dec: 1 },
   };
   const callText = (c) => CALLS[c.type].text(c.n, c.ref);
   function newCall(exclude) {
     const r = mulberry32(save.calls.seed++ * 9301 + 49297);
-    const ownedMaps = MAPS.filter((m) => ownsMap(m.id)), ownedCars = VEHICLES.filter((v) => ownsCar(v.id));
-    const pool = Object.keys(CALLS).filter((t) => {
-      const d = CALLS[t];
-      if (exclude.includes(t) || (d.needs && !ownsCar(d.needs))) return false;
-      if (d.ref === "map" && ownedMaps.length < 2) return false;
-      if (d.ref === "car" && ownedCars.length < 2) return false;
-      return true;
-    });
+    const pool = Object.keys(CALLS).filter((t) => !exclude.includes(t));
     const type = pool[Math.floor(r() * pool.length)], def = CALLS[type];
     const lvl = Math.floor(save.calls.done / 3);            // calls get harder as you complete them
     const ti = clamp(lvl + Math.floor(r() * 2) - (r() < 0.3 ? 1 : 0), 0, def.tiers.length - 1);
     const n = def.tiers[ti];
     let ref = null;
-    if (def.ref === "map") ref = ownedMaps[Math.floor(r() * ownedMaps.length)].id;
-    if (def.ref === "car") ref = ownedCars[Math.floor(r() * ownedCars.length)].id;
+    if (def.ref === "map") ref = MAPS[Math.floor(r() * MAPS.length)].id;
+    if (def.ref === "car") ref = VEHICLES[Math.floor(r() * VEHICLES.length)].id;
     return { type, n, ref, prog: 0, done: false, isNew: true, reward: Math.max(100, Math.round(def.reward(n) / 10) * 10) };
   }
   function refreshCalls() {
@@ -1444,17 +1490,24 @@
       const dir = (input.back ? 1 : 0) - (input.fwd ? 1 : 0);
       if (dir) {
         const w = ch.getAngularVelocity();
-        if (dir * w < (car.grounded ? 4 : 7)) ch.applyTorque(dir * (car.grounded ? st.tiltGround : st.tiltAir), true);
+        // Lying on its side or roof, the tilt pushes twice as hard so even the fire engine can roll back over
+        const tq = car.grounded ? st.tiltGround : run && run.tipped && car.bodyTouch ? st.tiltAir * 2 : st.tiltAir;
+        if (dir * w < (car.grounded ? 4 : 7)) ch.applyTorque(dir * tq, true);
       }
     }
 
+    // Head speed just before the step: by the time a hit registers, the collision has already stopped the body
+    const headSpeed0 = (() => { const hv = ch.getLinearVelocityFromWorldPoint(ch.getWorldPoint(Vec2(VEH.head[0], VEH.head[1]))); return Math.hypot(hv.x, hv.y); })();
+    const headWas = car.headTouch;
     world.step(dt, 8, 3);
 
     for (const w of car.wheels) w.touch = touchingGround(w.b);
     car.frontTouch = car.wheels[car.wheels.length - 1].touch;
     car.rearTouch = car.wheels.slice(0, -1).some((w) => w.touch);
     car.grounded = car.rearTouch || car.frontTouch;
-    car.roofTouch = touchingGround(ch, "roof");
+    car.headTouch = touchingGround(ch, "head");
+    car.headHit = car.headTouch ? (headWas ? 0 : headSpeed0) : 0;
+    car.bodyTouch = touchingGround(ch, "body");
 
     // Water cannon
     if (spray) {
@@ -1486,14 +1539,23 @@
     if (state !== "drive") return;
     run.maxKmh = Math.max(run.maxKmh, spd * 3.6);
 
-    // Crashes
-    if (car.roofTouch) { crash("rollover"); return; }
-    if (spd < 0.25 && !car.grounded) { run.stuck += dt; if (run.stuck > 2.5) { crash("stuck"); return; } } else run.stuck = 0;
+    // Crashes. Flips and roof landings are survivable: only a hard knock to the driver's head ends the run.
+    if (car.headTouch) {
+      const hv = ch.getLinearVelocityFromWorldPoint(ch.getWorldPoint(Vec2(VEH.head[0], VEH.head[1])));
+      if (Math.max(car.headHit, Math.hypot(hv.x, hv.y)) > HEAD_HIT) { crash("injured"); return; }
+    }
+    // Tipped over (or wedged with no wheels down) and not going anywhere: a countdown starts. Tilt to roll back.
+    const slope = Math.atan2(groundY(p.x + 1) - groundY(p.x - 1), 2);
+    run.tipped = Math.cos(ch.getAngle() - slope) < 0.35;
+    if ((run.tipped && spd < 1.5) || (spd < 0.25 && !car.grounded)) {
+      run.stuck += dt;
+      if (run.stuck > STUCK_TIME) { crash(run.tipped ? "flipped" : "stuck"); return; }
+    } else run.stuck = 0;
 
     // Oxygen / fuel
     run.o2 = Math.max(0, run.o2 - dt);
     if (run.o2 <= 0 && run.reserve) {
-      run.reserve = false; run.o2 = run.tank * 0.3; run.empty = 0;
+      run.reserve = false; run.reserveUsed = true; run.o2 = run.tank * 0.3; run.empty = 0;
       addPopup("Reserve O₂ +30%", 0); sfx.o2();
     }
     if (run.o2 <= 0) {
@@ -1542,13 +1604,14 @@
       }
     }
 
-    // Air time and flips
-    if (!car.grounded) {
+    // Air time and flips (only landings on the wheels score; scraping the roof ends the jump without a bonus)
+    if (!car.grounded && !car.bodyTouch) {
       if (!air.on) { air.on = true; air.t = 0; air.a0 = ch.getAngle(); }
       air.t += dt; air.vy = v.y;
     } else if (air.on) {
       air.on = false;
-      if (air.t > 0.3) landed(air.t, ch.getAngle() - air.a0, air.vy);
+      if (car.grounded && air.t > 0.3) landed(air.t, ch.getAngle() - air.a0, air.vy);
+      else run.maxAir = Math.max(run.maxAir, air.t);
     }
 
     // Distance markers and biome changes
@@ -3077,9 +3140,13 @@
       }
       if (run.o2 <= 0 && Math.floor(realNow * 2.5) % 2 === 0) drawCenterText(RES[VEH.res].out, "#ff8a8a", "Coasting…");
     }
+    if (run && state === "drive" && run.stuck > 0.6) {
+      const left = Math.max(1, Math.ceil(STUCK_TIME - run.stuck));
+      drawCenterText(`${run.tipped ? "FLIPPED!" : "STUCK!"} ${left}`, C.gold, run.tipped ? "Tilt to roll back onto your wheels" : "Rock it free!");
+    }
     if (state === "crash") {
-      const text = run.cause === "stuck" ? "STUCK!" : "ROLLOVER!";
-      drawCenterText(text, C.red);
+      const text = { stuck: "STUCK!", flipped: "FLIPPED!" }[run.cause] || "OUCH!";
+      drawCenterText(text, C.red, run.cause === "injured" ? "Driver injured" : "");
     }
     if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * (reduceMotion ? 0.3 : 0.7)})`; ctx.fillRect(0, 0, W, H); }
   }
@@ -3177,7 +3244,6 @@
 
   // ---------- Garage ----------
   const pillSvg = `<svg class="pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pill"/></svg>`;
-  const lockSvg = `<svg class="pick-lock" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>`;
   const TABS = ["upgrades", "vehicles", "maps", "calls"];
   let tab = TABS.includes(save.tab) ? save.tab : "upgrades";
 
@@ -3208,7 +3274,7 @@
   function estMass(v) {
     let m = 0;
     for (const p of v.parts) {
-      if (p.roof) continue;
+      if (p.head) continue;
       if (p.box) m += 4 * p.box[0] * p.box[1] * p.d;
       else { let a = 0; const q = p.poly; for (let i = 0; i < q.length; i++) { const [x1, y1] = q[i], [x2, y2] = q[(i + 1) % q.length]; a += x1 * y2 - x2 * y1; } m += Math.abs(a / 2) * p.d; }
     }
@@ -3262,15 +3328,13 @@
       const card = e.target.closest("[data-car]");
       if (!card) return;
       const v = vehicleById(card.dataset.car);
-      if (e.target.closest(".buy") && !ownsCar(v.id)) buyCar(v);
-      else if (sel.car !== v.id) { audio(); sfx.click(); selectCar(v.id); }
+      if (sel.car !== v.id) { audio(); sfx.click(); selectCar(v.id); }
     });
     $("map-list").addEventListener("click", (e) => {
       const card = e.target.closest("[data-map]");
       if (!card) return;
       const m = mapById(card.dataset.map);
-      if (e.target.closest(".buy") && !ownsMap(m.id)) buyMap(m);
-      else if (sel.map !== m.id) { audio(); sfx.click(); selectMap(m.id); }
+      if (sel.map !== m.id) { audio(); sfx.click(); selectMap(m.id); }
     });
     for (const id of ["veh-list", "map-list"]) {
       $(id).addEventListener("keydown", (e) => {
@@ -3292,22 +3356,22 @@
 
   function selectCar(id) {
     setLoadout(id, sel.map);
-    if (ownsCar(id)) { save.car = id; persist(); }
+    save.car = id; persist();
     renderGarage();
   }
   function selectMap(id) {
     setLoadout(sel.car, id);
-    if (ownsMap(id)) { save.map = id; persist(); }
+    save.map = id; persist();
     renderGarage();
   }
 
   function renderGarage() {
-    const v = VEH, m = MAP, up = save.ups[v.id], carOwned = ownsCar(v.id);
+    const v = VEH, m = MAP, up = save.ups[v.id];
     $("bank").textContent = fmt(save.pills);
     $("g-best").textContent = fmt(save.best[m.id]);
 
     // Upgrades for the selected vehicle
-    $("up-sub").textContent = carOwned ? `Upgrade your ${v.noun}` : `Unlock the ${v.name} to upgrade it`;
+    $("up-sub").textContent = `Upgrade your ${v.noun}`;
     for (const u of UPGRADES) {
       const el = cardEls[u.id], l = up[u.id], btn = el.querySelector(".buy"), color = u.color(v), name = u.name(v);
       const svg = el.querySelector(".card-icon svg");
@@ -3322,9 +3386,6 @@
       if (l >= MAX_LV) {
         btn.className = "buy maxed"; btn.innerHTML = `<span class="buy-label">Fully upgraded</span>`;
         btn.setAttribute("aria-label", `${name} fully upgraded`);
-      } else if (!carOwned) {
-        btn.className = "buy poor"; btn.innerHTML = `<span class="buy-label">Locked</span>`;
-        btn.setAttribute("aria-label", `${name}: unlock the ${v.name} first`);
       } else {
         const cost = costOf(u, l, v), poor = cost > save.pills;
         btn.className = "buy" + (poor ? " poor" : "");
@@ -3334,32 +3395,26 @@
     }
 
     // Vehicles
-    $("veh-list").innerHTML = VEHICLES.map((c) => {
-      const owned = ownsCar(c.id), selected = c.id === v.id, u2 = save.ups[c.id];
+    $("veh-list").innerHTML = VEHICLES.map((c, i) => {
+      const selected = c.id === v.id, u2 = save.ups[c.id];
       const bars = [["Speed", "speed"], ["Power", "power"], ["Grip", "grip"], ["Tank", "tank"]]
         .map(([lab, k]) => `<span>${lab}</span><span class="bar"><i style="width:${Math.round((BAR[k](c, u2) / barMax[k]) * 100)}%"></i></span>`).join("");
-      const btn = owned
-        ? `<button class="buy current" type="button" tabindex="-1" aria-hidden="true"><span class="buy-label">${selected ? "Driving this one" : "Tap to drive"}</span></button>`
-        : `<button class="buy${c.cost > save.pills ? " poor" : ""}" type="button" aria-label="Unlock ${c.name} for ${fmt(c.cost)} pills"><span class="buy-label">${c.cost > save.pills ? "Need" : "Unlock"}</span>${pillSvg}${fmt(c.cost)}</button>`;
-      return `<article class="pick${selected ? " sel" : ""}${owned ? "" : " locked"}" data-car="${c.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${c.name}${owned ? "" : " (locked)"}">
-        <div class="pick-art"><svg viewBox="0 0 64 32" aria-hidden="true"><use href="#${c.icon}"/></svg>${owned ? "" : lockSvg}</div>
-        <div><h3>${c.name}${selected ? ` <span class="badge">${owned ? "Selected" : "Preview"}</span>` : ""}</h3>
+      return `<article class="pick${selected ? " sel" : ""}" data-car="${c.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${c.name}">
+        <div class="pick-art"><svg viewBox="0 0 64 32" aria-hidden="true"><use href="#${c.icon}"/></svg></div>
+        <div><h3>${c.name}${selected ? ' <span class="badge">Selected</span>' : ""} <span class="key" title="Live swap key">${i + 1}</span></h3>
           <p class="pick-perk">${c.perk}</p><div class="bars">${bars}</div></div>
-        ${btn}</article>`;
+      </article>`;
     }).join("");
 
     // Maps
-    $("map-list").innerHTML = MAPS.map((mm) => {
-      const owned = ownsMap(mm.id), selected = mm.id === m.id;
+    $("map-list").innerHTML = MAPS.map((mm, i) => {
+      const selected = mm.id === m.id;
       const mods = mm.mods.map(([t, k]) => `<span class="mod ${k}">${t}</span>`).join("");
-      const btn = owned
-        ? `<p class="pick-perk">Best <b>${fmt(save.best[mm.id])} m</b></p>`
-        : `<button class="buy${mm.cost > save.pills ? " poor" : ""}" type="button" aria-label="Unlock ${mm.name} for ${fmt(mm.cost)} pills"><span class="buy-label">${mm.cost > save.pills ? "Need" : "Unlock"}</span>${pillSvg}${fmt(mm.cost)}</button>`;
-      return `<article class="pick${selected ? " sel" : ""}${owned ? "" : " locked"}" data-map="${mm.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${mm.name}${owned ? "" : " (locked)"}">
-        <div class="pick-art">${mapThumb(mm)}${owned ? "" : lockSvg}</div>
-        <div><h3>${mm.name}${selected ? ` <span class="badge">${owned ? "Selected" : "Preview"}</span>` : ""}</h3>
+      return `<article class="pick${selected ? " sel" : ""}" data-map="${mm.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${mm.name}">
+        <div class="pick-art">${mapThumb(mm)}</div>
+        <div><h3>${mm.name}${selected ? ' <span class="badge">Selected</span>' : ""} <span class="key" title="Live swap key">${i + 4}</span></h3>
           <p class="pick-perk">${mm.blurb}</p><div class="mods">${mods}</div></div>
-        ${btn}</article>`;
+        <p class="pick-perk">Best <b>${fmt(save.best[mm.id])} m</b></p></article>`;
     }).join("");
 
     // Dispatch calls
@@ -3381,34 +3436,26 @@
     if (tab === "calls" && calls.some((c) => c.isNew)) { for (const c of calls) c.isNew = false; persist(); }
 
     // Service record
-    const st = save.stats;
+    const st = save.stats, bestAny = Math.max(...MAPS.map((mm) => save.best[mm.id]));
     const rec = [["Runs", fmt(save.runs)], ["Total distance", fmt(st.dist) + " m"], ["Flips", fmt(st.flips)], ["Calls done", fmt(st.calls)],
-      ["Longest air", st.air.toFixed(1) + " s"], ["Top speed", fmt(st.speed) + " km/h"], ["Fires out", fmt(st.fires)], ["Maps open", `${save.owned.maps.length}/${MAPS.length}`]];
+      ["Longest air", st.air.toFixed(1) + " s"], ["Top speed", fmt(st.speed) + " km/h"], ["Fires out", fmt(st.fires)], ["Best run", fmt(bestAny) + " m"]];
     $("records").innerHTML = rec.map(([a, b]) => `<div class="stat"><span class="stat-label">${a}</span><span class="stat-val">${b}</span></div>`).join("");
 
-    // Tab dots: something affordable or new waiting in that tab
+    // Tab dots: an affordable upgrade or a new call waiting in that tab
     const dots = {
-      upgrades: carOwned && UPGRADES.some((u) => up[u.id] < MAX_LV && costOf(u, up[u.id], v) <= save.pills),
-      vehicles: VEHICLES.some((c) => !ownsCar(c.id) && c.cost <= save.pills),
-      maps: MAPS.some((mm) => !ownsMap(mm.id) && mm.cost <= save.pills),
+      upgrades: UPGRADES.some((u) => up[u.id] < MAX_LV && costOf(u, up[u.id], v) <= save.pills),
       calls: calls.some((c) => c.isNew),
     };
     for (const id of TABS) $("tab-" + id).querySelector(".dot").hidden = !dots[id] || id === tab;
 
-    // Loadout line and the Drive button
-    const ok = carOwned && ownsMap(m.id);
     $("loadout").innerHTML = `<svg viewBox="0 0 64 32" aria-hidden="true"><use href="#${v.icon}"/></svg><span><b>${v.name}</b> on <b>${m.name}</b></span>`;
-    const drive = $("btn-drive");
-    drive.disabled = !ok;
-    drive.innerHTML = ok ? `Drive <svg viewBox="0 0 24 24"><use href="#i-go"/></svg>` : (!carOwned ? "Vehicle locked" : "Map locked");
     syncToggles();
   }
 
-  function flashPick(sel2) { const el = document.querySelector(sel2); if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } }
   function buy(u) {
     audio();
     const v = VEH, up = save.ups[v.id], l = up[u.id];
-    if (l >= MAX_LV || !ownsCar(v.id)) { sfx.deny(); return; }
+    if (l >= MAX_LV) { sfx.deny(); return; }
     const cost = costOf(u, l, v);
     if (cost > save.pills) { sfx.deny(); return; }
     save.pills -= cost;
@@ -3419,30 +3466,6 @@
     el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
     if (state === "garage") newWorld();       // rebuild so the preview uses the new suspension and tires
     renderGarage();
-  }
-  function buyCar(v) {
-    audio();
-    if (v.cost > save.pills) { sfx.deny(); return; }
-    save.pills -= v.cost;
-    save.owned.cars.push(v.id);
-    save.car = v.id;
-    persist();
-    sfx.unlock();
-    setLoadout(v.id, sel.map);
-    renderGarage();
-    flashPick(`[data-car="${v.id}"]`);
-  }
-  function buyMap(m) {
-    audio();
-    if (m.cost > save.pills) { sfx.deny(); return; }
-    save.pills -= m.cost;
-    save.owned.maps.push(m.id);
-    save.map = m.id;
-    persist();
-    sfx.unlock();
-    setLoadout(sel.car, m.id);
-    renderGarage();
-    flashPick(`[data-map="${m.id}"]`);
   }
 
   // ---------- Audio (all synthesized) ----------
@@ -3587,11 +3610,6 @@
     },
     steam() { noise(0.9, { vol: 0.2, type: "highpass", freq: 4000, to: 1500, attack: 0.02 }); [988, 1319, 1568].forEach((f, i) => tone(f, 0.14, { type: "triangle", vol: 0.05, when: 0.15 + i * 0.07, send: 0.3 })); },
     call() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.14, { type: "triangle", vol: 0.06, when: i * 0.07, send: 0.35 })); tone(2093, 0.4, { type: "sine", vol: 0.05, when: 0.3, send: 0.4 }); },
-    unlock() {
-      [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.16, { type: "square", vol: 0.04, when: i * 0.08, cutoff: 3000, send: 0.4 }));
-      tone(1568, 0.6, { type: "triangle", vol: 0.06, when: 0.42, send: 0.5 });
-      noise(0.4, { vol: 0.1, type: "highpass", freq: 6000, when: 0.42 });
-    },
     report(best) {
       if (best) [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.18, { type: "square", vol: 0.04, when: 0.2 + i * 0.09, cutoff: 3000, send: 0.4 }));
       else [659, 523].forEach((f, i) => tone(f, 0.22, { type: "triangle", vol: 0.06, when: 0.2 + i * 0.16, send: 0.3 }));
@@ -3683,8 +3701,12 @@
   // ---------- Input ----------
   function clearInput() { input.gas = input.brake = input.back = input.fwd = input.ability = false; document.querySelectorAll(".down").forEach((e) => e.classList.remove("down")); }
   const KEYMAP = { KeyD: "gas", KeyA: "brake", ArrowLeft: "back", ArrowRight: "fwd", KeyW: "ability", ArrowUp: "ability", ShiftLeft: "ability", ShiftRight: "ability" };
+  const LIVE_KEYS = { KeyV: nextVehicle, KeyB: nextMap };
+  VEHICLES.forEach((v, i) => { LIVE_KEYS["Digit" + (i + 1)] = LIVE_KEYS["Numpad" + (i + 1)] = () => requestSwap(v.id, null); });
+  MAPS.forEach((m, i) => { LIVE_KEYS["Digit" + (i + 4)] = LIVE_KEYS["Numpad" + (i + 4)] = () => requestSwap(null, m.id); });
   window.addEventListener("keydown", (e) => {
     if (!$("confirm-reset").hidden) { if (e.code === "Escape") closeReset(); return; }   // the dialog swallows game keys
+    if (LIVE_KEYS[e.code]) { if (!e.repeat) LIVE_KEYS[e.code](); return; }
     const k = KEYMAP[e.code];
     if (k) {
       e.preventDefault();
@@ -3767,6 +3789,7 @@
   function frame(ts) {
     const rdt = Math.min(0.05, Math.max(0, (ts - last) / 1000));
     last = ts; realNow += rdt;
+    processSwaps();
     if (state === "crash" && realNow - crashAt > 1.5) endRun();
     const scale = state === "crash" && !reduceMotion ? 0.35 : 1;
     if (state !== "paused") {
@@ -3801,6 +3824,7 @@
       tick(n = 1) {
         for (let i = 0; i < n; i++) {
           realNow += DT;
+          processSwaps();
           if (state === "crash" && realNow - crashAt > 1.5) endRun();
           if (state !== "paused") gameStep(DT);
         }
