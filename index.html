@@ -402,6 +402,9 @@
   }
   .toggle svg { width: 20px; height: 20px; }
   .toggle[aria-pressed="false"] { background: #dfe5eb; color: var(--ink-soft); }
+  .btn-reset { justify-self: center; font-size: 14px; padding: 8px 16px; color: var(--red-dark); border-radius: 12px; box-shadow: 0 4px 0 var(--ink); }
+  #confirm-reset { background: rgba(20,33,43,0.6); }
+  .danger-note { font-size: 13px; }
 
   @keyframes rise { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
   @keyframes flash { 0% { background: var(--gold); } 100% { background: var(--white); } }
@@ -520,6 +523,7 @@
       <p class="calls-note" id="calls-note">Finish calls during your runs to earn bonus pills. You can swap one call after each run.</p>
       <p class="g-sub">Service record</p>
       <div class="records" id="records"></div>
+      <button class="btn btn-ghost btn-reset" id="btn-reset" type="button">Reset all progress</button>
     </div>
     <div class="g-foot">
       <p class="loadout" id="loadout"></p>
@@ -578,6 +582,17 @@
       <button class="toggle" id="p-music" type="button" aria-pressed="true"><svg viewBox="0 0 24 24"><use href="#i-music"/></svg>Music</button>
       <button class="toggle" id="p-sound" type="button" aria-pressed="true"><svg viewBox="0 0 24 24"><use href="#i-sound"/></svg>Sound</button>
     </div>
+  </div>
+</section>
+
+<!-- Reset confirmation -->
+<section id="confirm-reset" class="screen" hidden aria-label="Reset progress">
+  <div class="pause-card" role="alertdialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-desc">
+    <h2 id="reset-title">Reset everything?</h2>
+    <p id="reset-desc">This wipes all pills, upgrades, unlocked vehicles and maps, best distances, dispatch calls and stats. The game starts over like the very first time.</p>
+    <p class="danger-note">Your sound and music settings are kept. This can't be undone.</p>
+    <button class="btn btn-go" id="btn-reset-yes" type="button">Reset everything</button>
+    <button class="btn btn-ghost" id="btn-reset-no" type="button">Cancel</button>
   </div>
 </section>
 
@@ -1061,6 +1076,7 @@
     wall.createFixture(Edge(Vec2(X0 + 4, -2), Vec2(X0 + 4, 40)), { friction: 0.2, userData: "wall" });
     syncChunks(START_X);
     car = makeCar(START_X, VEH);
+    prevPoses = null;
   }
 
   // Swap the previewed vehicle or map (garage) and rebuild the scene around it
@@ -1629,7 +1645,7 @@
 
   // ---------- Camera ----------
   function updateCamera(dt) {
-    const p = car.chassis.getPosition(), v = car.chassis.getLinearVelocity();
+    const p = carPose(), v = car.chassis.getLinearVelocity();
     const base = H > W ? clamp(W / 12.5, 22, 56) : clamp(Math.min(W / 21, H / 10.5), 24, 66);
     const speedK = clamp(Math.abs(v.x) / 22, 0, 1);
     const garage = state === "garage";
@@ -2599,12 +2615,29 @@
     }
   }
 
+  // ---------- Render interpolation ----------
+  // Physics runs at a fixed 120 Hz but screens refresh at 60, 144 or 165 Hz. Drawing the vehicle part-way
+  // between the last two physics steps keeps it moving smoothly instead of juddering (which reads as blur).
+  let prevPoses = null, lerpK = 1;
+  function capturePoses() {
+    prevPoses = [car.chassis, ...car.wheels.map((w) => w.b)].map((b) => { const p = b.getPosition(); return { x: p.x, y: p.y, a: b.getAngle() }; });
+  }
+  function viewPose(b, i) {
+    const p = b.getPosition(), a = b.getAngle(), q = prevPoses && prevPoses[i];
+    if (!q) return { x: p.x, y: p.y, a };
+    return { x: lerp(q.x, p.x, lerpK), y: lerp(q.y, p.y, lerpK), a: lerp(q.a, a, lerpK) };
+  }
+  const carPose = () => viewPose(car.chassis, 0);
+  // A point given in the vehicle's local metres, placed in the world using a drawn pose
+  const wpt = (P, lx, ly) => { const c = Math.cos(P.a), sn = Math.sin(P.a); return { x: P.x + c * lx - sn * ly, y: P.y + sn * lx + c * ly }; };
+
   // ---------- Drawing: vehicles ----------
   const glassGrad = (y0, y1) => { const g = ctx.createLinearGradient(0, y1, 0, y0); g.addColorStop(0, "#a9dcf6"); g.addColorStop(1, "#5b9fcf"); return g; };
   const beaconPhase = () => Math.floor(realNow * (state === "garage" ? 2.5 : 6)) % 2;
 
   function drawCar(pal) {
-    const ch = car.chassis, p = ch.getPosition(), a = ch.getAngle();
+    const P = carPose(), p = P, a = P.a;
+    const WP = car.wheels.map((w, i) => viewPose(w.b, i + 1));
     ctx.lineJoin = "round"; ctx.lineCap = "round";
 
     // Soft ground shadow
@@ -2624,13 +2657,13 @@
     }
 
     // Suspension struts
-    for (const w of car.wheels) {
-      const top = ch.getWorldPoint(Vec2(w.lx, 0)), wp = w.b.getPosition();
+    car.wheels.forEach((w, i) => {
+      const top = wpt(P, w.lx, 0), wp = WP[i];
       ctx.strokeStyle = "#2b343d"; ctx.lineWidth = 0.17;
       ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
       ctx.strokeStyle = "#9aa6b1"; ctx.lineWidth = 0.06;
       ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
-    }
+    });
 
     ctx.save();
     ctx.translate(p.x, p.y); ctx.rotate(a);
@@ -2643,18 +2676,18 @@
     for (const lx of VEH.wheels) { ctx.beginPath(); ctx.arc(lx, -0.12, archR, 0, Math.PI); ctx.closePath(); ctx.fill(); }
     ctx.restore();
 
-    for (const w of car.wheels) drawWheel(w.b, VEH.wheelR);
+    for (const wp of WP) drawWheel(wp, VEH.wheelR);
 
     // Lettering
     if (VEH.id === "police") {
-      const tp = ch.getWorldPoint(Vec2(-0.48, 0.2));
+      const tp = wpt(P, -0.48, 0.2);
       worldText("POLICE", tp.x, tp.y, 0.2, C.ink, { rot: a });
     } else if (VEH.id === "fire") {
-      const tp = ch.getWorldPoint(Vec2(-0.66, 0.7)), np = ch.getWorldPoint(Vec2(1.03, 0.45));
+      const tp = wpt(P, -0.66, 0.7), np = wpt(P, 1.03, 0.45);
       worldText("FIRE DEPT", tp.x, tp.y, 0.22, "#ffffff", { rot: a, stroke: 0.2 });
       worldText("7", np.x, np.y, 0.26, C.gold, { rot: a, stroke: 0.22 });
     } else {
-      const tp = ch.getWorldPoint(Vec2(-0.52, 0.225));
+      const tp = wpt(P, -0.52, 0.225);
       worldText("AMBULANCE", tp.x, tp.y, 0.17, "#ffffff", { rot: a });
     }
   }
@@ -2880,8 +2913,8 @@
     ctx.fillStyle = "#44505c"; rr(-2.18, -0.18, 0.2, 0.16, 0.05); ctx.fill(); ctx.stroke();
   }
 
-  function drawWheel(b, R) {
-    const p = b.getPosition(), a = b.getAngle();
+  function drawWheel(pose, R) {
+    const p = pose, a = pose.a;
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a); ctx.scale(R / 0.42, R / 0.42);
     const r = 0.42;
     ctx.fillStyle = "#1f262d"; circle(0, 0, r); ctx.fill();
@@ -2900,24 +2933,37 @@
   }
 
   const BEACON_COLORS = { ambulance: [[255, 70, 70], [70, 150, 255]], police: [[255, 70, 70], [70, 150, 255]], fire: [[255, 60, 50], [255, 190, 60]] };
+  function glowAt(x, y, r, c, a) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(c, a)); g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  // Light halos are drawn behind the vehicle so they glow around it instead of washing over the paintwork
   function drawGlows(pal) {
-    const ch = car.chassis;
+    const P = carPose();
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    const glowAt = (x, y, r, c, a) => {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, rgba(c, a)); g.addColorStop(1, rgba(c, 0));
-      ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    };
     for (const gl of glows) glowAt(gl.x, gl.y, gl.r, gl.c, gl.a);
     const phase = beaconPhase(), night = clamp(pal.night, 0, 1);
     const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
-    const lamp = ch.getWorldPoint(Vec2(bx, by));
+    const lamp = wpt(P, bx, by);
     glowAt(lamp.x, lamp.y, 1.2 + night * 1.6, phase ? cols[0] : cols[1], 0.38 + night * 0.35);
-    const hl = ch.getWorldPoint(Vec2(VEH.headlight[0], VEH.headlight[1]));
+    const hl = wpt(P, VEH.headlight[0], VEH.headlight[1]);
     glowAt(hl.x, hl.y, 0.5 + night * 0.6, [255, 236, 170], 0.3 + night * 0.4);
-    if (night > 0.1) { const tl = ch.getWorldPoint(Vec2(VEH.taillight[0], VEH.taillight[1])); glowAt(tl.x, tl.y, 0.7, [255, 60, 60], 0.4 * night); }
-    if (run && run.boosting) { const e = ch.getWorldPoint(Vec2(VEH.exhaust[0], VEH.exhaust[1])); glowAt(e.x, e.y, 1.4, [255, 150, 60], 0.55); }
+    if (night > 0.1) { const tl = wpt(P, VEH.taillight[0], VEH.taillight[1]); glowAt(tl.x, tl.y, 0.7, [255, 60, 60], 0.4 * night); }
+    if (run && run.boosting) { const e = wpt(P, VEH.exhaust[0], VEH.exhaust[1]); glowAt(e.x, e.y, 1.4, [255, 150, 60], 0.55); }
+    ctx.restore();
+  }
+  // Small bright cores right on the lamps, drawn over the vehicle
+  function drawLightCores(pal) {
+    const P = carPose(), phase = beaconPhase(), night = clamp(pal.night, 0, 1);
+    const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const lamp = wpt(P, bx, by);
+    glowAt(lamp.x, lamp.y, 0.34, phase ? cols[0] : cols[1], 0.5 + night * 0.2);
+    const hl = wpt(P, VEH.headlight[0], VEH.headlight[1]);
+    glowAt(hl.x, hl.y, 0.24, [255, 236, 170], 0.35 + night * 0.3);
     ctx.restore();
   }
 
@@ -3057,9 +3103,10 @@
     drawTerrain(pal);
     drawPickups(pal);
     drawFires(pal);
+    drawGlows(pal);
     drawCar(pal);
     drawParticles(pal);
-    drawGlows(pal);
+    drawLightCores(pal);
     screenTransform();
     drawWeather(pal);
     drawOverlays();
@@ -3637,6 +3684,7 @@
   function clearInput() { input.gas = input.brake = input.back = input.fwd = input.ability = false; document.querySelectorAll(".down").forEach((e) => e.classList.remove("down")); }
   const KEYMAP = { KeyD: "gas", KeyA: "brake", ArrowLeft: "back", ArrowRight: "fwd", KeyW: "ability", ArrowUp: "ability", ShiftLeft: "ability", ShiftRight: "ability" };
   window.addEventListener("keydown", (e) => {
+    if (!$("confirm-reset").hidden) { if (e.code === "Escape") closeReset(); return; }   // the dialog swallows game keys
     const k = KEYMAP[e.code];
     if (k) {
       e.preventDefault();
@@ -3679,6 +3727,21 @@
   click("btn-resume", resume);
   click("btn-restart", startRun);
   click("btn-quit", toGarage);
+
+  // Reset all progress: wipe the save (and the old v1 save, or it would be migrated again), keep sound settings
+  function openReset() { $("confirm-reset").hidden = false; setTimeout(() => $("btn-reset-no").focus({ preventScroll: true }), 50); }
+  function closeReset() { $("confirm-reset").hidden = true; $("btn-reset").focus({ preventScroll: true }); }
+  function resetProgress() {
+    try {
+      localStorage.removeItem(OLD_KEY);
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ muted: save.muted, music: save.music }));
+    } catch (e) { /* storage blocked: the reload below still starts from scratch */ }
+    location.reload();
+  }
+  click("btn-reset", openReset);
+  click("btn-reset-no", closeReset);
+  click("btn-reset-yes", resetProgress);
+  $("confirm-reset").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeReset(); });
   $("btn-siren").addEventListener("click", () => { audio(); toggleSiren(); });
   $("g-sound").addEventListener("click", () => { audio(); setMuted(!save.muted); sfx.click(); });
   $("g-music").addEventListener("click", () => { audio(); setMusic(!save.music); sfx.click(); });
@@ -3709,8 +3772,9 @@
     if (state !== "paused") {
       acc += rdt * scale;
       let n = 0;
-      while (acc >= DT && n < 10) { gameStep(DT); acc -= DT; n++; }
+      while (acc >= DT && n < 10) { capturePoses(); gameStep(DT); acc -= DT; n++; }
       if (n === 10) acc = 0;
+      lerpK = clamp(acc / DT, 0, 1);
     }
     updateCamera(rdt);
     render(rdt);
@@ -3741,7 +3805,7 @@
           if (state !== "paused") gameStep(DT);
         }
       },
-      draw() { cam.snap = true; updateCamera(0); render(0); updateHud(); } };
+      draw() { prevPoses = null; cam.snap = true; updateCamera(0); render(0); updateHud(); } };
   }
   requestAnimationFrame(frame);
 })();
