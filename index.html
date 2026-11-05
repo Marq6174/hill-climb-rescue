@@ -328,6 +328,23 @@
   .ability .ab-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: rgba(255,255,255,0.28); transform-origin: bottom; }
   .ability.down { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); background: var(--gold); }
 
+  /* ---------- Out of fuel countdown ---------- */
+  #out-panel {
+    position: fixed; left: 50%; top: 20%; transform: translateX(-50%);
+    width: min(280px, calc(100% - 32px));
+    background: var(--panel); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink);
+    padding: 12px 16px; display: grid; justify-items: center; gap: 4px; text-align: center;
+  }
+  #out-panel h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 20px; color: var(--red); }
+  .out-time { font-family: var(--font-display); font-size: 54px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .out-time small { font-size: 0.4em; margin-left: 3px; }
+  .out-track { width: 100%; height: 14px; border: 3px solid var(--ink); border-radius: 8px; background: var(--white); overflow: hidden; }
+  .out-fill { height: 100%; background: var(--o2); transform-origin: left center; }
+  #out-panel.urgent .out-fill { background: var(--red); }
+  #out-panel.urgent .out-time { color: var(--red); }
+  .out-hint { margin: 2px 0 0; font-size: 12.5px; font-weight: 800; color: var(--ink-soft); }
+  .out-end { border: 2px solid var(--ink); border-radius: 9px; background: var(--white); font-weight: 900; font-size: 12px; padding: 3px 10px; cursor: pointer; margin-top: 2px; }
+
   /* ---------- Biome banner ---------- */
   #banner {
     position: fixed; left: 50%; top: 24%; transform: translateX(-50%);
@@ -477,6 +494,15 @@
 
 <div id="banner" aria-live="polite"><small id="banner-sub"></small><strong id="banner-title"></strong></div>
 
+<!-- Out of fuel countdown -->
+<div id="out-panel" role="status" hidden>
+  <h2 id="out-title">OUT OF FUEL</h2>
+  <div class="out-time"><span id="out-sec">30</span><small>s</small></div>
+  <div class="out-track"><div class="out-fill" id="out-fill"></div></div>
+  <p class="out-hint">Send gifts to refuel!</p>
+  <button class="out-end" id="out-end" type="button">End run</button>
+</div>
+
 <!-- Garage -->
 <section id="garage" class="screen" aria-label="Garage">
   <div class="garage">
@@ -529,6 +555,7 @@
         <span><span class="key">Esc</span> pause</span>
         <span><span class="key">M</span><span class="key">N</span> sound / music</span>
         <span><span class="key">1</span>–<span class="key">8</span> <span class="key">V</span><span class="key">B</span> live swaps</span>
+        <span><span class="key">F</span><span class="key">G</span><span class="key">J</span><span class="key">K</span><span class="key">R</span> gifts</span>
       </p>
       <p class="help" id="help-touch" hidden>Pedals drive and reverse. The round buttons tilt your vehicle. The blue button fires nitro or the water cannon.</p>
       <button class="btn btn-go btn-drive" id="btn-drive" type="button">Drive <svg viewBox="0 0 24 24"><use href="#i-go"/></svg></button>
@@ -1017,6 +1044,11 @@
     }
   }
   const pillValue = (val) => Math.round(val * MAP.pay);
+  function firstPillAt(x) {
+    let a = 0, b = pills.length;
+    while (a < b) { const m = (a + b) >> 1; if (pills[m].x < x) a = m + 1; else b = m; }
+    return a;
+  }
 
   // ---------- Physics world ----------
   const DT = 1 / 120;
@@ -1113,6 +1145,10 @@
   const air = { on: false, t: 0, a0: 0, vy: 0 };
 
   const STUCK_TIME = 4;      // s: how long you can sit tipped over or wedged before the run ends
+  const OUT_TIME = 30;       // s: how long viewers have to refuel you once the tank is empty
+  const JAIL_TIME = 15, JAIL_MAX = 60;   // s: one "put me in jail" gift, and the most they can stack up
+  const BOOST_DIST = 5000, BOOST_SPEED = 750;   // m and m/s: one air medevac flight
+  const BOOM_TIME = 3;       // s from the explosion to the next vehicle
 
   function newRun() {
     for (const p of pills) { p.got = false; p.gotAt = 0; }
@@ -1122,6 +1158,7 @@
       pills: 0, bonus: 0, flips: 0, maxAir: 0, dist: 0, refills: 0, fires: 0, maxKmh: 0, nitroTime: 0,
       o2: car.stats.tank, tank: car.stats.tank, empty: 0, stuck: 0, tipped: false, reserve: VEH.id === "ambulance", reserveUsed: false, swaps: 0,
       ability: 1, abilityLock: false, boosting: false, spraying: false, sprayAcc: 0,
+      jail: 0, jailAt: -10, cageOffAt: -10, jailNext: 0, heli: null, fuelPopup: null,
       biome: 0, cause: "", siren: false, sirenUntil: 0, nextMarker: 100,
       hr: 82, lastV: { x: 0, y: 0 }, lowBeep: 0, startedAt: realNow, callsAt: 0, callsDone: [],
     };
@@ -1129,6 +1166,8 @@
 
   function startRun() {
     audio();
+    refreshCalls();
+    iris = null; fadeShot = null;
     if (save.car !== sel.car || save.map !== sel.map) { save.car = sel.car; save.map = sel.map; persist(); }
     newWorld();
     run = newRun();
@@ -1152,6 +1191,8 @@
   function toGarage() {
     state = "garage";
     run = null;
+    iris = null; fadeShot = null;
+    $("out-panel").hidden = true;
     refreshCalls();
     newWorld();
     cam.snap = true;
@@ -1214,10 +1255,8 @@
     "Police nitro also works in the air. Use it to stretch a jump.",
   ];
 
-  function endRun() {
-    if (state === "results") return;
-    state = "results";
-    clearInput();
+  // Bank a finished run: best distance, pills, lifetime stats and calls
+  function settleRun() {
     run.boosting = run.spraying = false;
     const dist = Math.floor(run.dist);
     const isBest = dist > save.best[MAP.id];
@@ -1231,6 +1270,17 @@
     checkCalls(true);
     save.calls.skip = true;
     persist();
+    return { dist, isBest, earned };
+  }
+
+  let resultsAt = 0;
+  function endRun() {
+    if (state === "results") return;
+    state = "results";
+    resultsAt = realNow;
+    clearInput();
+    $("out-panel").hidden = true;
+    const { dist, isBest, earned } = settleRun();
 
     const [title, sub] = causeText(run.cause);
     const callPills = run.callsDone.reduce((a, c) => a + c.reward, 0);
@@ -1295,6 +1345,143 @@
     if (popups.length > 3) popups.shift();
   }
 
+  // ---------- Viewer gifts ----------
+  // Fuel, jail, KABOOM and the air medevac. Stream tools trigger these with keys or window.HillClimbRescue.
+  const inRun = () => run && (state === "drive" || state === "paused");
+
+  // Fuel gifts can overfill the tank; rapid gifts add up into one notice
+  function changeFuel(pct) {
+    if (!inRun() || !pct) return;
+    run.o2 = clamp(run.o2 + (run.tank * pct) / 100, 0, run.tank * 10);
+    if (run.o2 > 0) run.empty = 0;
+    const last = run.fuelPopup, joins = last && Math.sign(last.pct) === Math.sign(pct) && realNow - last.t < 1.5 && popups.includes(last);
+    const pop = joins ? last : { amount: 0, pct: 0 };
+    pop.pct += pct;
+    pop.t = realNow;
+    pop.title = `${pop.pct > 0 ? "+" : "−"}${Math.abs(pop.pct)}% ${VEH.res === "o2" ? "O₂" : "FUEL"}`;
+    pop.color = pop.pct > 0 ? "#7df0b0" : "#ff8a8a";
+    if (!joins) { popups.push(pop); if (popups.length > 3) popups.shift(); }
+    run.fuelPopup = pop;
+    if (pct > 0) sfx.fuelUp(); else sfx.fuelDown();
+  }
+
+  function putInJail(sec = JAIL_TIME) {
+    if (state !== "drive") return;
+    if (run.heli) { run.jailNext = sec; return; }   // locked up as soon as the helicopter lands
+    if (run.jail <= 0) { run.jailAt = realNow; addPopup("Jailed!", 0, "#ffc531"); sfx.jail(); }
+    run.jail = Math.min(run.jail + sec, JAIL_MAX);
+  }
+  function releaseJail() {
+    run.jail = 0;
+    run.cageOffAt = realNow;
+    const ch = car.chassis;
+    ch.applyLinearImpulse(Vec2(0, car.stats.mass * 3.5), ch.getWorldCenter(), true);
+    addPopup("Free!", 0);
+    sfx.release();
+  }
+
+  // KABOOM: the vehicle blows apart, the score goes back to 0 and the next vehicle rolls out
+  let boomAt = 0, iris = null;
+  function kaboom() {
+    if (state !== "drive" || run.heli) return;
+    state = "boom";
+    boomAt = realNow;
+    run.cause = "kaboom";
+    run.jail = 0;
+    clearInput();
+    settleRun();
+    $("banner").classList.remove("show");
+    car.blown = true;
+    shake = reduceMotion ? 0 : 0.8;
+    flash = 0.8;
+    sfx.kaboom();
+    const ch = car.chassis, p = ch.getPosition(), m = car.stats.mass, kick = Math.sqrt(-MAP.gravity) * 3;
+    for (const w of car.wheels) {
+      world.destroyJoint(w.j);
+      const wm = w.b.getMass();
+      w.b.applyLinearImpulse(Vec2((Math.random() - 0.5) * 6 * wm, (0.6 + Math.random() * 0.6) * kick * wm), w.b.getPosition(), true);
+      w.b.setAngularVelocity((Math.random() - 0.5) * 30);
+    }
+    ch.applyLinearImpulse(Vec2(-m * 2, m * kick), ch.getWorldCenter(), true);
+    ch.applyAngularImpulse(ch.getInertia() * (Math.random() < 0.5 ? -1 : 1) * (3 + Math.random() * 2), true);
+    const cols = DEBRIS[VEH.id];
+    for (let i = 0; i < 30; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 7;
+      particles.push({ kind: "flame", x: p.x + (Math.random() - 0.5) * 2.4, y: p.y + Math.random() * 1.4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 2, life: 0, max: 0.5 + Math.random() * 0.5, r: 0.3 + Math.random() * 0.5, grow: 0.7, color: i % 3 ? [255, 150, 40] : [255, 225, 110], a: 0.95, g: -0.1 });
+      particles.push({ kind: "puff", x: p.x + (Math.random() - 0.5) * 2, y: p.y + Math.random(), vx: Math.cos(a) * sp * 0.3, vy: 1 + Math.random() * 2.5, life: 0, max: 1.4 + Math.random(), r: 0.3 + Math.random() * 0.3, grow: 0.9, color: [55, 50, 50], a: 0.55, g: -0.1 });
+      particles.push({ kind: "debris", x: p.x + (Math.random() - 0.5) * 2, y: p.y + Math.random(), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 4, life: 0, max: 1.4 + Math.random(), w: 0.1 + Math.random() * 0.18, h: 0.06 + Math.random() * 0.1, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 14, color: cols[i % 3], g: 1 });
+    }
+  }
+  function nextVehicleAfterBoom() {
+    const others = VEHICLES.filter((v) => v.id !== sel.car), next = others[Math.floor(Math.random() * others.length)];
+    setLoadout(next.id, sel.map);
+    save.car = next.id; persist();
+    startRun();
+    iris = { open: true, t0: realNow };
+    addPopup("GO!", 0, "#ffffff");
+  }
+
+  // Air medevac: a helicopter carries you 5,000 m down the course, then sets you back down on the road
+  function startHelicopter() {
+    if (state !== "drive") return;
+    if (run.heli) { run.heli.toX += BOOST_DIST; return; }
+    const ch = car.chassis, p = ch.getPosition();
+    run.jail = 0;
+    run.boosting = run.spraying = false;
+    run.stuck = 0;
+    air.on = false;
+    run.heli = { x: p.x, y: p.y + 1.5, v: Math.max(0, ch.getLinearVelocity().x), toX: p.x + BOOST_DIST, a: 0 };
+    smokePuff(p.x, p.y);
+    addPopup(`Air medevac ${fmt(BOOST_DIST)} m`, 0, "#ffc531");
+    sfx.banner();
+  }
+  function stepHelicopter(dt) {
+    const h = run.heli, left = h.toX - h.x;
+    h.v = Math.min(h.v + 400 * dt, BOOST_SPEED, Math.max(10, left * 2.4));
+    h.x += h.v * dt;
+    // Fly just over whatever hill is coming up
+    const look = h.v * 0.2, top = Math.max(groundY(h.x), groundY(h.x + look * 0.5), groundY(h.x + look));
+    h.y += (top + 5 - h.y) * Math.min(1, dt * 3);
+    h.a += (-0.2 * Math.min(1, h.v / 150) - h.a) * Math.min(1, dt * 4);
+    run.dist = Math.max(run.dist, h.x - START_X);
+    if (h.x >= h.toX - 0.5) landHelicopter();
+  }
+  // The nearest place ahead that's gentle under a whole vehicle, so nobody gets set down on a crater rim
+  function safeSpot(x) {
+    for (let d = 0; d < 80; d++) {
+      let ok = true;
+      for (let k = -4; k < 4 && ok; k++) ok = Math.abs(groundY(x + d + k + 1) - groundY(x + d + k)) < 0.3;
+      if (ok) return x + d;
+    }
+    return x;
+  }
+  function landHelicopter() {
+    const h = run.heli, x = safeSpot(h.x), vx = Math.min(h.v, 8);
+    run.heli = null;
+    newWorld(x);
+    for (const b of [car.chassis, ...car.wheels.map((w) => w.b)]) b.setLinearVelocity(Vec2(vx, 0));
+    for (const w of car.wheels) w.b.setAngularVelocity(-vx / VEH.wheelR);
+    run.lastV = { x: vx, y: 0 };
+    run.biome = dominantBiome(x);
+    run.nextMarker = (Math.floor(run.dist / 100) + 1) * 100;
+    smokePuff(x, groundY(x) + 0.6);
+    sfx.land(9);
+    if (run.jailNext) { const sec = run.jailNext; run.jailNext = 0; putInJail(sec); }
+  }
+  function smokePuff(x, y) {
+    for (let i = 0; i < 14; i++) {
+      particles.push({ kind: "puff", x: x + (Math.random() - 0.5) * 3, y: y + Math.random(), vx: (Math.random() - 0.5) * 3, vy: 0.5 + Math.random() * 1.5, life: 0, max: 0.9, r: 0.3, grow: 0.9, color: [235, 240, 245], a: 0.6, g: -0.1 });
+    }
+  }
+
+  // Timed events that run once per frame or test tick
+  function timers() {
+    processSwaps();
+    if (state === "crash" && realNow - crashAt > 1.5) endRun();
+    if (state === "boom" && realNow - boomAt >= BOOM_TIME) nextVehicleAfterBoom();
+    if (state === "results" && autoOn && realNow - resultsAt >= AUTO_RESTART) startRun();
+  }
+
   // ---------- Live swaps (TikTok LIVE and other stream tools) ----------
   // Viewers can change the vehicle or the map in the middle of a run. Stream tools trigger it with keys
   // (1–3 vehicle, 4–8 map, V / B next) or from a script through window.HillClimbRescue or postMessage.
@@ -1320,6 +1507,7 @@
   function processSwaps() {
     if (!pendingSwap) return;
     if (state !== "drive" && state !== "paused") { pendingSwap = null; return; }
+    if (run.heli) return;
     if (realNow - lastSwapAt >= SWAP_COOLDOWN) liveSwap(pendingSwap);
   }
   function liveSwap(sw) {
@@ -1329,10 +1517,12 @@
     if (!carChanged && !mapChanged) return;
     const ch = car.chassis, x = Math.max(START_X, ch.getPosition().x), vx = clamp(ch.getLinearVelocity().x, -4, 14);
     const frac = run.tank > 0 ? run.o2 / run.tank : 1;
+    captureFade();
     sel.car = sw.car; sel.map = sw.map; save.car = sw.car; save.map = sw.map; persist();
     VEH = vehicleById(sw.car);
     if (mapChanged) { MAP = mapById(sw.map); resetCourse(); genPickups(x + 120); }
-    newWorld(x);
+    const spot = safeSpot(x);
+    newWorld(spot);
     // Keep rolling at the same speed in the new vehicle, on the new ground
     for (const b of [car.chassis, ...car.wheels.map((w) => w.b)]) b.setLinearVelocity(Vec2(vx, 0));
     for (const w of car.wheels) w.b.setAngularVelocity(-vx / VEH.wheelR);
@@ -1349,6 +1539,11 @@
   }
   // Public hooks for stream overlays and bots
   window.HillClimbRescue = {
+    addFuel: (pct = 2) => changeFuel(Math.abs(+pct) || 2),
+    removeFuel: (pct = 2) => changeFuel(-(Math.abs(+pct) || 2)),
+    jail: (sec = JAIL_TIME) => putInJail(Math.max(1, +sec) || JAIL_TIME),
+    kaboom,
+    helicopter: startHelicopter,
     vehicles: VEHICLES.map((v) => v.id), maps: MAPS.map((m) => m.id),
     vehicle: (id) => { if (VEHICLES.some((v) => v.id === id)) requestSwap(id, null); },
     map: (id) => { if (MAPS.some((m) => m.id === id)) requestSwap(null, id); },
@@ -1361,6 +1556,8 @@
     if (d.map) window.HillClimbRescue.map(d.map);
     if (d.next === "vehicle") nextVehicle();
     if (d.next === "map") nextMap();
+    const act = window.HillClimbRescue[d.action];
+    if (["addFuel", "removeFuel", "jail", "kaboom", "helicopter"].includes(d.action)) act(d.amount);
   });
 
   // ---------- Dispatch calls (missions) ----------
@@ -1438,21 +1635,86 @@
     }
   }
 
+  // ---------- Auto driving ----------
+  // Toggled with a key and never shown on screen. While it's on, the game drives itself whenever nobody
+  // is touching the controls; press anything and you're driving, let go and it picks back up.
+  const AUTO_RESUME = 1;      // s after you let go before it takes back over
+  const AUTO_RESTART = 6;     // s the run report stays up before auto starts the next run
+  const autoCtl = { gas: false, brake: false, back: false, fwd: false, ability: false };
+  let ctl = input, autoOn = false, lastHumanAt = -10, autoBack = 0, autoStall = 0, autoFlip = 1;
+  function toggleAuto() { autoOn = !autoOn; lastHumanAt = -10; autoBack = 0; autoStall = 0; }
+  function chooseControls() {
+    if (input.gas || input.brake || input.back || input.fwd || input.ability) lastHumanAt = realNow;
+    ctl = autoOn && state === "drive" && run && realNow - lastHumanAt >= AUTO_RESUME ? autoDrive() : input;
+  }
+  const slopeAt = (x, span = 1) => Math.atan2(groundY(x + span) - groundY(x - span), 2 * span);
+  const wrapAngle = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+  function autoDrive() {
+    const c = autoCtl, ch = car.chassis, p = ch.getPosition(), v = ch.getLinearVelocity(), w = ch.getAngularVelocity(), a = ch.getAngle();
+    const g = -MAP.gravity, here = slopeAt(p.x, 1.5), pitch = wrapAngle(a - here);
+    c.gas = c.brake = c.back = c.fwd = c.ability = false;
+    if (run.jail > 0) { autoBack = 0; autoStall = 0; return c; }
+
+    // Lying on its side or roof: roll back the short way
+    if (run.tipped && car.bodyTouch) {
+      if (pitch > 0) c.fwd = true; else c.back = true;
+      return c;
+    }
+
+    // In the air: line up with the ground where we're going to land
+    if (!car.grounded && !car.bodyTouch) {
+      const h = Math.max(0, p.y - groundY(p.x)), t = clamp((v.y + Math.sqrt(Math.max(0, v.y * v.y + 2 * g * h))) / g, 0, 3);
+      const err = wrapAngle(a - slopeAt(p.x + v.x * t, 2)) + w * 0.22;
+      if (err > 0.1) c.fwd = true; else if (err < -0.1) c.back = true;
+      return c;
+    }
+
+    // Wedged or stalled on a climb: back down for a run-up, rocking if the belly is hung up
+    autoStall = Math.abs(v.x) < 0.8 && run.o2 > 0 ? autoStall + DT : 0;
+    if (autoStall > 1.6 && autoBack <= 0) { autoBack = 1.4; autoStall = 0; autoFlip = -autoFlip; }
+    if (autoBack > 0) {
+      autoBack -= DT;
+      c.brake = true;
+      if (car.bodyTouch) { if (autoFlip > 0) c.back = true; else c.fwd = true; }
+      return c;
+    }
+
+    // On the ground: keep the nose level with the road
+    if (pitch > 0.32) c.fwd = true; else if (pitch < -0.28) c.back = true;
+
+    // Speed: carry momentum up hills, slow down for crests that would throw us into the air
+    const look = clamp(v.x * 0.55, 3, 22);
+    const drop = here - Math.min(slopeAt(p.x + look, 2), slopeAt(p.x + look * 1.8, 2));
+    const cap = Math.sqrt(g) * (MAP.gravity > -8 ? 3.6 : 5.2);
+    const target = Math.max(4, cap - Math.max(0, drop) * cap * 1.1);
+    if (v.x > target + 2.5) c.brake = true;
+    else if (v.x < target && pitch < 0.55) c.gas = true;
+
+    // Specials: nitro only to rescue a stalling climb; water whenever a fire is in range
+    if (VEH.ability === "nitro") c.ability = here > 0.3 && v.x < 5 && pitch < 0.3;
+    else if (VEH.ability === "water") c.ability = fires.some((f) => !f.out && f.x - p.x > 1 && f.x - p.x < 12);
+    return c;
+  }
+
   // ---------- Simulation step ----------
   function gameStep(dt) {
     simNow += dt;
+    if (run && run.heli) { stepHelicopter(dt); updateParticles(dt); return; }
+    chooseControls();
     const ch = car.chassis;
     const st = car.stats;
     syncChunks(ch.getPosition().x);
 
     const driving = state === "drive";
+    const jailed = driving && run.jail > 0;
+    if (jailed) { run.jail -= dt; if (run.jail <= 0) releaseJail(); }
     const hasO2 = run && run.o2 > 0;
 
     // Abilities drain a charge that refills over time. Emptying it locks the ability until you let go.
     let boost = false, spray = false;
-    if (driving && VEH.ability) {
-      if (!input.ability) run.abilityLock = false;
-      const want = input.ability && !run.abilityLock && run.ability > 0 && (VEH.ability === "water" || hasO2);
+    if (driving && !jailed && VEH.ability) {
+      if (!ctl.ability) run.abilityLock = false;
+      const want = ctl.ability && !run.abilityLock && run.ability > 0 && (VEH.ability === "water" || hasO2);
       if (VEH.ability === "nitro") boost = want; else spray = want;
       if (want) {
         run.ability = Math.max(0, run.ability - dt / (boost ? 3.2 : 4));
@@ -1465,10 +1727,10 @@
 
     // Motors
     let speed = 0, torque = 0.4;
-    if (state === "garage") { speed = 0; torque = 60; }
-    else if (driving && hasO2 && (input.gas || input.brake || boost)) {
+    if (state === "garage" || jailed) { speed = 0; torque = 60; }
+    else if (driving && hasO2 && (ctl.gas || ctl.brake || boost)) {
       const w = car.rear.getAngularVelocity();
-      if ((input.gas || boost) && !input.brake) {
+      if ((ctl.gas || boost) && !ctl.brake) {
         speed = -st.speed * (boost ? 1.35 : 1); torque = st.torque * (boost ? 1.3 : 1);
         // Wheelie limiter: ease off when the nose climbs too far above the slope
         if (car.rearTouch && !car.frontTouch) {
@@ -1478,12 +1740,12 @@
           torque *= clamp(1 - (pitch - 0.45) / 0.5, 0.2, 1);
         }
       }
-      else if (input.brake && !input.gas) {
+      else if (ctl.brake && !ctl.gas) {
         if (w < -3) { speed = 0; torque = st.torque * 1.6; }
         else { speed = st.speed * 0.5; torque = st.torque * 0.85; }
       } else { speed = 0; torque = st.torque * 1.6; }
     }
-    for (const w of car.wheels) { w.j.enableMotor(true); w.j.setMotorSpeed(speed); w.j.setMaxMotorTorque(torque); }
+    if (!car.blown) for (const w of car.wheels) { w.j.enableMotor(true); w.j.setMotorSpeed(speed); w.j.setMaxMotorTorque(torque); }
 
     // Nitro pushes the whole vehicle forward along its body, on the ground or in the air
     if (boost) {
@@ -1492,8 +1754,8 @@
     }
 
     // Tilt (arrow keys / round buttons)
-    if (driving) {
-      const dir = (input.back ? 1 : 0) - (input.fwd ? 1 : 0);
+    if (driving && !jailed) {
+      const dir = (ctl.back ? 1 : 0) - (ctl.fwd ? 1 : 0);
       if (dir) {
         const w = ch.getAngularVelocity();
         const tq = car.grounded ? st.tiltGround : run && run.tipped && car.bodyTouch ? st.tiltRecover : st.tiltAir;
@@ -1501,6 +1763,7 @@
       }
     }
 
+    if (jailed) { const jv = ch.getLinearVelocity(); ch.setLinearVelocity(Vec2(jv.x * 0.9, jv.y)); }   // the cage stops you dead
     world.step(dt, 8, 3);
 
     for (const w of car.wheels) w.touch = touchingGround(w.b);
@@ -1542,32 +1805,34 @@
 
     // Crashes. Flips are fine as long as you land on the wheels or away from the driver:
     // the moment the ground touches the roof above the driver's head, the run ends.
-    if (car.headTouch) { crash("injured"); return; }
+    if (car.headTouch && !jailed) { crash("injured"); return; }
     // Tipped over (or wedged with no wheels down) and not going anywhere: a countdown starts. Tilt to roll back.
     const slope = Math.atan2(groundY(p.x + 1) - groundY(p.x - 1), 2);
     run.tipped = Math.cos(ch.getAngle() - slope) < 0.35;
-    if ((run.tipped && spd < 1.5) || (spd < 0.25 && !car.grounded)) {
+    if (jailed) run.stuck = 0;
+    else if ((run.tipped && spd < 1.5) || (spd < 0.25 && (!car.grounded || car.bodyTouch))) {
       run.stuck += dt;
       if (run.stuck > STUCK_TIME) { crash(run.tipped ? "flipped" : "stuck"); return; }
     } else run.stuck = 0;
 
     // Oxygen / fuel
-    run.o2 = Math.max(0, run.o2 - dt);
+    if (!jailed) run.o2 = Math.max(0, run.o2 - dt);
     if (run.o2 <= 0 && run.reserve) {
       run.reserve = false; run.reserveUsed = true; run.o2 = run.tank * 0.3; run.empty = 0;
       addPopup("Reserve O₂ +30%", 0); sfx.o2();
     }
     if (run.o2 <= 0) {
-      run.empty += dt;
-      if ((spd < 0.35 && run.empty > 1.2) || run.empty > 9) { run.cause = "oxygen"; endRun(); return; }
+      if (!jailed) run.empty += dt;
+      if (run.empty >= OUT_TIME) { run.cause = "oxygen"; endRun(); return; }
     } else if (run.o2 / run.tank < 0.2 && simNow - run.lowBeep > 1.1) {
       run.lowBeep = simNow; sfx.alarm();
     }
 
     // Pickups
     const pts = [p, ...car.wheels.map((w) => w.b.getPosition())];
-    for (const pl of pills) {
-      if (pl.got || Math.abs(pl.x - p.x) > 3.5) continue;
+    for (let i = firstPillAt(p.x - 3.5); i < pills.length && pills[i].x <= p.x + 3.5; i++) {
+      const pl = pills[i];
+      if (pl.got) continue;
       for (const q of pts) {
         if ((q.x - pl.x) ** 2 + (q.y - pl.y) ** 2 < 1.1) {
           pl.got = true; pl.gotAt = simNow; run.pills += pillValue(pl.val);
@@ -1583,7 +1848,7 @@
         // On the Moon a supply beam above each canister lets you grab it mid-jump
         const hit = (q.x - o.x) ** 2 + (q.y - o.y) ** 2 < 1.6 || (MAP.beam && Math.abs(q.x - o.x) < 1.1 && q.y > o.y - 1 && q.y < o.y + 9);
         if (hit) {
-          o.got = true; o.gotAt = simNow; run.o2 = run.tank; run.empty = 0; run.refills++;
+          o.got = true; o.gotAt = simNow; run.o2 = Math.max(run.o2, run.tank); run.empty = 0; run.refills++;
           sfx.o2(); sparkle(o.x, o.y, VEH.res === "o2" ? [34, 178, 106] : [255, 159, 26]); addPopup(RES[VEH.res].refill, 0);
           break;
         }
@@ -1620,7 +1885,7 @@
     if (simNow - run.callsAt > 0.25) { run.callsAt = simNow; checkCalls(false); }
 
     // Effects
-    const throttle = input.gas || input.brake || boost;
+    const throttle = ctl.gas || ctl.brake || boost;
     if (hasO2 && throttle) {
       if (Math.random() < 0.35) {
         const e = ch.getWorldPoint(Vec2(VEH.exhaust[0], VEH.exhaust[1]));
@@ -1707,7 +1972,8 @@
 
   // ---------- Camera ----------
   function updateCamera(dt) {
-    const p = carPose(), v = car.chassis.getLinearVelocity();
+    const heli = run && run.heli;
+    const p = heli || carPose(), v = heli ? { x: 0, y: 0 } : car.chassis.getLinearVelocity();
     const base = H > W ? clamp(W / 12.5, 22, 56) : clamp(Math.min(W / 21, H / 10.5), 24, 66);
     const speedK = clamp(Math.abs(v.x) / 22, 0, 1);
     const garage = state === "garage";
@@ -1718,7 +1984,7 @@
     const ty = p.y + (garage ? 4.2 : 0.9) + clamp(v.y * 0.12, -1.5, 1.5);
     if (cam.snap) { cam.x = tx; cam.y = ty; cam.zoom = zTarget; cam.snap = false; return; }
     cam.zoom += (zTarget - cam.zoom) * Math.min(1, dt * 1.6);
-    cam.x += (tx - cam.x) * Math.min(1, dt * 5);
+    cam.x = heli ? tx : cam.x + (tx - cam.x) * Math.min(1, dt * 5);   // at helicopter speed a lagging camera would lose it
     cam.y += (ty - cam.y) * Math.min(1, dt * 3.5);
   }
   const sx = (x) => (x - cam.x) * cam.zoom + W / 2;
@@ -2554,8 +2820,8 @@
 
   function drawPickups(pal) {
     const [x0, x1] = viewRange();
-    for (const p of pills) {
-      if (p.x < x0 - 1 || p.x > x1 + 1) continue;
+    for (let i = firstPillAt(x0 - 1); i < pills.length && pills[i].x <= x1 + 1; i++) {
+      const p = pills[i];
       let y = p.y + Math.sin(simNow * 3 + p.x) * 0.06, a = 1, s = 1;
       if (p.got) { const k = (simNow - p.gotAt) / 0.35; if (k >= 1) continue; y += k * 1.2; a = 1 - k; s = 1 + k * 0.6; }
       drawPill(p.x, y, p.val, a, s);
@@ -2718,8 +2984,10 @@
       ctx.restore();
     }
 
+    if (car.blown) ctx.filter = "brightness(0.35) saturate(0.6)";   // a charred wreck (wheels have flown off, so no struts)
+
     // Suspension struts
-    car.wheels.forEach((w, i) => {
+    if (!car.blown) car.wheels.forEach((w, i) => {
       const top = wpt(P, w.lx, 0), wp = WP[i];
       ctx.strokeStyle = "#2b343d"; ctx.lineWidth = 0.17;
       ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
@@ -2752,6 +3020,92 @@
       const tp = wpt(P, -0.52, 0.225);
       worldText("AMBULANCE", tp.x, tp.y, 0.17, "#ffffff", { rot: a });
     }
+    ctx.filter = "none";
+  }
+
+  // Jail: a cage drops over the vehicle with a countdown badge, and flies off when time's up
+  function drawCage() {
+    if (!run) return;
+    const since = realNow - run.cageOffAt, leaving = run.jail <= 0;
+    if (leaving && since > 0.7) return;
+    const P = carPose();
+    const drop = leaving ? since * since * 18 : Math.pow(Math.max(0, 1 - (realNow - run.jailAt) / 0.28), 2) * 9;
+    const x0 = VEH.exhaust[0] - 0.2, x1 = VEH.headlight[0] + 0.35, y0 = VEH.wheelY - VEH.wheelR - 0.05, y1 = VEH.head[1] + 0.35;
+    ctx.save();
+    ctx.translate(P.x, P.y); ctx.rotate(P.a); ctx.translate(0, drop);
+    ctx.globalAlpha = leaving ? clamp(1 - since / 0.7, 0, 1) : 1;
+    ctx.lineJoin = "round";
+    const n = Math.round((x1 - x0) / 0.42), bar = (x1 - x0) / n;
+    ctx.lineWidth = 0.03; ctx.strokeStyle = C.ink;
+    for (let i = 0; i <= n; i++) { ctx.fillStyle = "#8a97a3"; ctx.fillRect(x0 + i * bar - 0.035, y0, 0.07, y1 - y0); ctx.strokeRect(x0 + i * bar - 0.035, y0, 0.07, y1 - y0); }
+    for (const yy of [y0, (y0 + y1) / 2, y1]) { ctx.fillStyle = "#5d6b78"; rr(x0 - 0.08, yy - 0.06, x1 - x0 + 0.16, 0.12, 0.03); ctx.fill(); ctx.stroke(); }
+    if (!leaving) { ctx.fillStyle = C.gold; rr(x0 - 0.2, y1 - 0.2, 0.62, 0.62, 0.13); ctx.fill(); ctx.lineWidth = 0.05; ctx.stroke(); }
+    ctx.restore();
+    if (!leaving) { const b = wpt(P, x0 + 0.11, y1 + 0.11 + drop); worldText(String(Math.ceil(run.jail)), b.x, b.y, 0.42, C.ink, { rot: P.a }); }
+  }
+
+  // Air medevac helicopter, in the same chunky inked style as the vehicles
+  function drawHelicopter(pal) {
+    const h = run.heli, ink = C.ink;
+    const phase = beaconPhase();
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const bcn = wpt({ x: h.x, y: h.y, a: h.a }, -0.4, 1.0);
+    glowAt(bcn.x, bcn.y, 1.3 + clamp(pal.night, 0, 1), phase ? [255, 70, 70] : [70, 150, 255], 0.4);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(h.x, h.y); ctx.rotate(h.a);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    const t = realNow;
+    // Skids
+    ctx.strokeStyle = "#34404b"; ctx.lineWidth = 0.07;
+    ctx.beginPath(); ctx.moveTo(-0.6, -0.42); ctx.lineTo(-0.75, -0.75); ctx.moveTo(0.7, -0.42); ctx.lineTo(0.85, -0.75); ctx.stroke();
+    ctx.fillStyle = "#34404b"; rr(-1.2, -0.83, 2.55, 0.09, 0.04); ctx.fill();
+    // Tail boom, fin and tail rotor
+    const paint = ctx.createLinearGradient(0, -0.45, 0, 0.95);
+    paint.addColorStop(0, "#dbe2ea"); paint.addColorStop(0.45, "#ffffff"); paint.addColorStop(1, "#f1f5f8");
+    ctx.beginPath(); ctx.moveTo(-0.7, 0.55); ctx.lineTo(-3.1, 0.68); ctx.lineTo(-3.1, 0.46); ctx.lineTo(-0.7, 0.05); ctx.closePath();
+    ctx.fillStyle = paint; ctx.fill(); ctx.lineWidth = 0.05; ctx.strokeStyle = ink; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-2.75, 0.62); ctx.lineTo(-3.4, 1.15); ctx.lineTo(-3.1, 1.15); ctx.lineTo(-2.55, 0.62); ctx.closePath();
+    ctx.fillStyle = C.red; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "rgba(90,105,120,0.3)"; circle(-3.05, 0.6, 0.42); ctx.fill();
+    ctx.save(); ctx.translate(-3.05, 0.6); ctx.rotate(t * 40);
+    ctx.fillStyle = "#34404b"; rr(-0.42, -0.03, 0.84, 0.06, 0.03); ctx.fill();
+    ctx.restore();
+    // Fuselage with the red stripe
+    const bodyPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(-1.0, 0.95); ctx.lineTo(0.55, 0.95);
+      ctx.quadraticCurveTo(1.7, 0.85, 1.85, 0.05); ctx.quadraticCurveTo(1.8, -0.42, 1.0, -0.45);
+      ctx.lineTo(-0.9, -0.45); ctx.quadraticCurveTo(-1.25, -0.3, -1.2, 0.35); ctx.quadraticCurveTo(-1.2, 0.9, -1.0, 0.95); ctx.closePath();
+    };
+    bodyPath(); ctx.fillStyle = paint; ctx.fill();
+    ctx.save(); bodyPath(); ctx.clip();
+    ctx.fillStyle = C.red; ctx.fillRect(-1.4, -0.4, 3.4, 0.24);
+    ctx.fillStyle = C.blue; ctx.fillRect(-1.4, -0.14, 3.4, 0.045);
+    ctx.restore();
+    bodyPath(); ctx.lineWidth = 0.055; ctx.strokeStyle = ink; ctx.stroke();
+    // Cockpit with the pilot, cabin window and red cross
+    const glass = glassGrad(0.12, 0.82);
+    const cockpit = () => { ctx.beginPath(); ctx.moveTo(0.55, 0.84); ctx.quadraticCurveTo(1.45, 0.75, 1.64, 0.12); ctx.lineTo(0.55, 0.12); ctx.closePath(); };
+    cockpit(); ctx.fillStyle = glass; ctx.fill();
+    ctx.save(); cockpit(); ctx.clip();
+    ctx.fillStyle = C.blue; rr(0.72, 0.02, 0.42, 0.2, 0.07); ctx.fill();
+    ctx.fillStyle = "#f1c29c"; circle(0.92, 0.36, 0.13); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(0.92, 0.39, 0.15, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = ink; circle(1.0, 0.35, 0.018); ctx.fill();
+    ctx.restore();
+    cockpit(); ctx.lineWidth = 0.045; ctx.strokeStyle = ink; ctx.stroke();
+    rr(-0.8, 0.32, 1.1, 0.42, 0.06); ctx.fillStyle = glass; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = C.red; ctx.fillRect(-0.36, -0.08, 0.14, 0.34); ctx.fillRect(-0.46, 0.02, 0.34, 0.14);
+    // Rotor mast, blur and blade
+    ctx.fillStyle = "#34404b"; rr(-0.1, 0.93, 0.2, 0.26, 0.04); ctx.fill();
+    ctx.fillStyle = "rgba(90,105,120,0.28)"; ctx.beginPath(); ctx.ellipse(0, 1.22, 3.1, 0.1, 0, 0, Math.PI * 2); ctx.fill();
+    const blade = Math.cos(t * 26) * 3.1;
+    ctx.strokeStyle = "#2b343d"; ctx.lineWidth = 0.07; ctx.beginPath(); ctx.moveTo(-blade, 1.22); ctx.lineTo(blade, 1.22); ctx.stroke();
+    ctx.restore();
+    const tp = wpt({ x: h.x, y: h.y, a: h.a }, 0.35, -0.28);
+    worldText("AIR MEDEVAC", tp.x, tp.y, 0.17, "#ffffff", { rot: h.a });
   }
 
   function drawAmbulanceBody() {
@@ -3006,6 +3360,7 @@
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     for (const gl of glows) glowAt(gl.x, gl.y, gl.r, gl.c, gl.a);
+    if (car.blown || (run && run.heli)) { ctx.restore(); return; }
     const phase = beaconPhase(), night = clamp(pal.night, 0, 1);
     const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
     const lamp = wpt(P, bx, by);
@@ -3018,6 +3373,7 @@
   }
   // Small bright cores right on the lamps, drawn over the vehicle
   function drawLightCores(pal) {
+    if (car.blown || (run && run.heli)) return;
     const P = carPose(), phase = beaconPhase(), night = clamp(pal.night, 0, 1);
     const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
     ctx.save();
@@ -3077,9 +3433,9 @@
   }
 
   function drawGauges() {
-    if (!run || (state !== "drive" && state !== "crash" && state !== "paused")) return;
+    if (!run || (state !== "drive" && state !== "crash" && state !== "paused" && state !== "boom")) return;
     const v = car.chassis.getLinearVelocity();
-    const kmh = Math.hypot(v.x, v.y) * 3.6;
+    const kmh = run.heli ? run.heli.v * 3.6 : state === "boom" ? 0 : Math.hypot(v.x, v.y) * 3.6;
     const compact = coarse && W < 760;
     const r = compact ? 30 : clamp(W * 0.045, 36, 52);
     const maxKmh = Math.ceil((car.stats.topKmh * 1.3) / 20) * 20;
@@ -3117,14 +3473,14 @@
     popups = popups.filter((p) => realNow - p.t < 1.9);
   }
 
-  function drawCenterText(text, color, sub) {
+  function drawCenterText(text, color, sub, yk = 0.4, scale = 1) {
     ctx.save();
     ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
-    const size = clamp(W * 0.07, 34, 72);
+    const size = clamp(W * 0.07, 34, 72) * scale, y = H * yk;
     ctx.font = `${size}px ${F_DISPLAY}`;
-    ctx.lineWidth = size * 0.22; ctx.strokeStyle = C.ink; ctx.strokeText(text, W / 2, H * 0.4);
-    ctx.fillStyle = color; ctx.fillText(text, W / 2, H * 0.4);
-    if (sub) { ctx.font = `900 ${Math.round(size * 0.3)}px ${F_BODY}`; ctx.lineWidth = 6; ctx.strokeText(sub, W / 2, H * 0.4 + size * 0.7); ctx.fillStyle = "#ffffff"; ctx.fillText(sub, W / 2, H * 0.4 + size * 0.7); }
+    ctx.lineWidth = size * 0.22; ctx.strokeStyle = C.ink; ctx.strokeText(text, W / 2, y);
+    ctx.fillStyle = color; ctx.fillText(text, W / 2, y);
+    if (sub) { ctx.font = `900 ${Math.round(size * 0.3)}px ${F_BODY}`; ctx.lineWidth = 6; ctx.strokeText(sub, W / 2, y + size * 0.7); ctx.fillStyle = "#ffffff"; ctx.fillText(sub, W / 2, y + size * 0.7); }
     ctx.restore();
   }
 
@@ -3137,17 +3493,51 @@
         g.addColorStop(0, "rgba(226,59,59,0)"); g.addColorStop(1, `rgba(226,59,59,${(0.18 + pulse * 0.18) * (reduceMotion ? 0.6 : 1)})`);
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
       }
-      if (run.o2 <= 0 && Math.floor(realNow * 2.5) % 2 === 0) drawCenterText(RES[VEH.res].out, "#ff8a8a", "Coasting…");
+      if (run.o2 > 0 && frac < 0.2 && !run.heli && Math.floor(realNow * 2.5) % 2 === 0) drawCenterText(VEH.res === "o2" ? "O₂ LOW" : "FUEL LOW", "#ff8a8a", "", 0.62, 0.45);
     }
     if (run && state === "drive" && run.stuck > 0.6) {
       const left = Math.max(1, Math.ceil(STUCK_TIME - run.stuck));
       drawCenterText(`${run.tipped ? "FLIPPED!" : "STUCK!"} ${left}`, C.gold, run.tipped ? "Tilt to roll back onto your wheels" : "Rock it free!");
+    }
+    if (state === "boom") {
+      const age = realNow - boomAt, pop = age < 0.25 ? 1 + 0.5 * Math.sin((age / 0.25) * Math.PI) : 1;
+      drawCenterText("KABOOM!", C.amber, "", 0.62, pop);
     }
     if (state === "crash") {
       const text = { stuck: "STUCK!", flipped: "FLIPPED!" }[run.cause] || "OUCH!";
       drawCenterText(text, C.red, run.cause === "injured" ? "Driver injured" : "");
     }
     if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * (reduceMotion ? 0.3 : 0.7)})`; ctx.fillRect(0, 0, W, H); }
+  }
+
+  // A copy of the last frame, faded out over the new scene after a viewer swap
+  let fadeShot = null;
+  function captureFade() {
+    const c = document.createElement("canvas");
+    c.width = canvas.width; c.height = canvas.height;
+    c.getContext("2d").drawImage(canvas, 0, 0);
+    fadeShot = { c, t0: realNow };
+  }
+  function drawFade() {
+    if (!fadeShot) return;
+    const k = (realNow - fadeShot.t0) / 0.45;
+    if (k >= 1) { fadeShot = null; return; }
+    ctx.save(); ctx.globalAlpha = 1 - k; ctx.drawImage(fadeShot.c, 0, 0, W, H); ctx.restore();
+  }
+  function drawIris() {
+    let k = 1;
+    if (state === "boom") k = clamp((BOOM_TIME - (realNow - boomAt)) / 0.45, 0, 1);
+    else if (iris) {
+      const a = realNow - iris.t0;
+      if (a >= 0.8) { iris = null; return; }
+      k = a < 0.25 ? 0.14 : 0.14 + 0.86 * smooth(0.25, 0.8, a);   // a beat on the new vehicle, then open up
+    }
+    if (k >= 1) return;
+    const P = carPose(), cx = sx(P.x), cy = sy(P.y + 0.3), r = k * Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy));
+    ctx.save();
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(cx, cy, Math.max(0, r), 0, Math.PI * 2); ctx.fill("evenodd");
+    ctx.restore();
   }
 
   // ---------- Render ----------
@@ -3170,7 +3560,7 @@
     drawPickups(pal);
     drawFires(pal);
     drawGlows(pal);
-    drawCar(pal);
+    if (run && run.heli) drawHelicopter(pal); else { drawCar(pal); drawCage(); }
     drawParticles(pal);
     drawLightCores(pal);
     screenTransform();
@@ -3178,6 +3568,8 @@
     drawOverlays();
     drawGauges();
     drawPopups();
+    drawFade();
+    drawIris();
     shake = Math.max(0, shake - rdt * 1.4);
     flash = Math.max(0, flash - rdt * 3);
   }
@@ -3191,10 +3583,20 @@
     $("o2-fill").style.transform = `scaleX(${frac})`;
     const low = frac < 0.2;
     if (hudCache.low !== low) { hudCache.low = low; $("o2").classList.toggle("low", low); }
-    const px = car.chassis.getPosition().x;
+    const px = run.heli ? run.heli.x : car.chassis.getPosition().x;
     const next = o2s.find((o) => !o.got && o.x > px - 0.5);
-    const res = RES[VEH.res], best = save.best[MAP.id];
-    setText("o2-next", run.o2 <= 0 ? res.empty : next ? `${res.next} ${fmt(Math.max(0, next.x - px))} m` : "");
+    const res = RES[VEH.res], best = save.best[MAP.id], pct = `${Math.ceil((run.o2 / run.tank) * 100)}%`;
+    setText("o2-next", run.o2 <= 0 ? res.empty : next ? `${pct} · ${res.next} ${fmt(Math.max(0, next.x - px))} m` : pct);
+    // Out-of-fuel countdown panel
+    const out = run.o2 <= 0 && !run.heli && (state === "drive" || state === "paused");
+    if (hudCache.out !== out) { hudCache.out = out; $("out-panel").hidden = !out; }
+    if (out) {
+      const left = Math.max(0, OUT_TIME - run.empty);
+      setText("out-title", res.out);
+      setText("out-sec", String(Math.ceil(left)));
+      $("out-fill").style.transform = `scaleX(${left / OUT_TIME})`;
+      $("out-panel").classList.toggle("urgent", left <= 10);
+    }
     setText("run-pills", fmt(run.pills + run.bonus));
     setText("dist", fmt(run.dist));
     setText("best-line", run.dist > best && best > 0 ? "New best!" : `Best ${fmt(best)} m`);
@@ -3611,12 +4013,23 @@
     },
     steam() { noise(0.9, { vol: 0.2, type: "highpass", freq: 4000, to: 1500, attack: 0.02 }); [988, 1319, 1568].forEach((f, i) => tone(f, 0.14, { type: "triangle", vol: 0.05, when: 0.15 + i * 0.07, send: 0.3 })); },
     call() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.14, { type: "triangle", vol: 0.06, when: i * 0.07, send: 0.35 })); tone(2093, 0.4, { type: "sine", vol: 0.05, when: 0.3, send: 0.4 }); },
+    fuelUp() { tone(660, 0.07, { type: "triangle", vol: 0.05 }); tone(990, 0.1, { type: "triangle", vol: 0.05, when: 0.05 }); },
+    fuelDown() { tone(420, 0.09, { type: "square", vol: 0.03, cutoff: 1400, slide: 0.7 }); },
+    jail() { tone(210, 0.3, { type: "square", vol: 0.07, cutoff: 1600 }); tone(317, 0.35, { type: "square", vol: 0.05, cutoff: 2200, when: 0.02 }); noise(0.16, { vol: 0.22, type: "highpass", freq: 2500 }); },
+    release() { [523, 784].forEach((f, i) => tone(f, 0.12, { type: "triangle", vol: 0.06, when: i * 0.07, send: 0.25 })); noise(0.12, { vol: 0.1, type: "highpass", freq: 3000 }); },
+    kaboom() {
+      noise(1.3, { vol: 0.75, type: "lowpass", freq: 1600, to: 120 });
+      tone(62, 1.0, { vol: 0.4, slide: 0.4 });
+      noise(0.3, { vol: 0.35, type: "highpass", freq: 1500, to: 400 });
+      for (let i = 0; i < 9; i++) tone(2400 + Math.random() * 2600, 0.12, { type: "triangle", vol: 0.03, when: 0.1 + Math.random() * 0.8 });
+    },
     report(best) {
       if (best) [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.18, { type: "square", vol: 0.04, when: 0.2 + i * 0.09, cutoff: 3000, send: 0.4 }));
       else [659, 523].forEach((f, i) => tone(f, 0.22, { type: "triangle", vol: 0.06, when: 0.2 + i * 0.16, send: 0.3 }));
     },
   };
 
+  let chopAt = 0;   // next helicopter rotor beat
   function updateAudio(rdt) {
     if (!actx) return;
     const t = actx.currentTime;
@@ -3624,7 +4037,7 @@
     let throttle = 0, rpm = 0;
     if (on && run) {
       const hasO2 = run.o2 > 0;
-      throttle = hasO2 && state === "drive" && (input.gas || input.brake) ? 1 : 0;
+      throttle = hasO2 && state === "drive" && (ctl.gas || ctl.brake) ? 1 : 0;
       rpm = clamp(Math.abs(car.rear.getAngularVelocity()) / car.stats.speed, 0, 1.2);
       if (throttle && !car.grounded) rpm = Math.min(1.25, rpm + 0.3);
       if (!hasO2) rpm *= Math.random() < 0.15 ? 0.2 : 0.6;
@@ -3637,6 +4050,7 @@
     eng.f.frequency.setTargetAtTime(E.cutoff + rpmS * 1300 + throttle * 450 + boost * 600, t, 0.05);
     eng.g.gain.setTargetAtTime(on ? (state === "crash" ? 0 : 0.03 + throttle * 0.045 + rpmS * 0.015 + boost * 0.02) : 0, t, state === "crash" ? 0.2 : 0.06);
     eng.rg.gain.setTargetAtTime(on && state === "drive" ? E.rumble + rpmS * 0.08 : 0, t, 0.08);
+    if (run && run.heli && state === "drive" && t >= chopAt) { chopAt = t + 0.085; noise(0.06, { vol: 0.24, type: "lowpass", freq: 650, to: 220 }); }
     hiss.spg.gain.setTargetAtTime(on && state === "drive" && run && run.spraying ? 0.09 : 0, t, 0.05);
     const sirenOn = state === "drive" && run && (run.siren || realNow < run.sirenUntil) && !save.muted;
     sir.sg.gain.setTargetAtTime(sirenOn ? 0.035 : 0, t, 0.05);
@@ -3702,7 +4116,10 @@
   // ---------- Input ----------
   function clearInput() { input.gas = input.brake = input.back = input.fwd = input.ability = false; document.querySelectorAll(".down").forEach((e) => e.classList.remove("down")); }
   const KEYMAP = { KeyD: "gas", KeyA: "brake", ArrowLeft: "back", ArrowRight: "fwd", KeyW: "ability", ArrowUp: "ability", ShiftLeft: "ability", ShiftRight: "ability" };
-  const LIVE_KEYS = { KeyV: nextVehicle, KeyB: nextMap };
+  const LIVE_KEYS = {
+    KeyV: nextVehicle, KeyB: nextMap,
+    KeyF: () => changeFuel(2), KeyG: () => changeFuel(-2), KeyJ: () => putInJail(), KeyK: kaboom, KeyR: startHelicopter, KeyO: toggleAuto,
+  };
   VEHICLES.forEach((v, i) => { LIVE_KEYS["Digit" + (i + 1)] = LIVE_KEYS["Numpad" + (i + 1)] = () => requestSwap(v.id, null); });
   MAPS.forEach((m, i) => { LIVE_KEYS["Digit" + (i + 4)] = LIVE_KEYS["Numpad" + (i + 4)] = () => requestSwap(null, m.id); });
   window.addEventListener("keydown", (e) => {
@@ -3723,6 +4140,7 @@
     else if (e.code === "KeyN") { audio(); setMusic(!save.music); }
     else if (e.code === "Enter" || e.code === "Space") {
       if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
+      if (state === "drive" && run.o2 <= 0 && !run.heli) { e.preventDefault(); giveUp(); return; }
       if (state === "garage" || state === "results") { e.preventDefault(); startRun(); }
     }
   });
@@ -3750,6 +4168,8 @@
   click("btn-resume", resume);
   click("btn-restart", startRun);
   click("btn-quit", toGarage);
+  function giveUp() { if (state === "drive" && run.o2 <= 0) { run.cause = "oxygen"; endRun(); } }
+  click("out-end", giveUp);
 
   // Reset all progress: wipe the save (and the old v1 save, or it would be migrated again), keep sound settings
   function openReset() { $("confirm-reset").hidden = false; setTimeout(() => $("btn-reset-no").focus({ preventScroll: true }), 50); }
@@ -3790,8 +4210,7 @@
   function frame(ts) {
     const rdt = Math.min(0.05, Math.max(0, (ts - last) / 1000));
     last = ts; realNow += rdt;
-    processSwaps();
-    if (state === "crash" && realNow - crashAt > 1.5) endRun();
+    timers();
     const scale = state === "crash" && !reduceMotion ? 0.35 : 1;
     if (state !== "paused") {
       acc += rdt * scale;
@@ -3825,12 +4244,11 @@
       tick(n = 1) {
         for (let i = 0; i < n; i++) {
           realNow += DT;
-          processSwaps();
-          if (state === "crash" && realNow - crashAt > 1.5) endRun();
+          timers();
           if (state !== "paused") gameStep(DT);
         }
       },
-      draw() { prevPoses = null; cam.snap = true; updateCamera(0); render(0); updateHud(); } };
+      draw(rdt = 0) { prevPoses = null; cam.snap = true; updateCamera(0); render(rdt); updateHud(); } };
   }
   requestAnimationFrame(frame);
 })();

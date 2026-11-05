@@ -15,6 +15,7 @@ An emergency-services hill climber. Drive an ambulance, a police cruiser or a fi
 | Pause | `Esc` or `P` | Pause button (top right) |
 | Sound / music | `M` / `N` | Buttons in the garage and pause menu |
 | Live swaps | `1`–`3` vehicle, `4`–`8` map, `V` / `B` next | — |
+| Viewer gifts | `F` add fuel, `G` remove fuel, `J` jail, `K` KABOOM, `R` helicopter | — |
 
 In the garage, press `D` or `Enter` to start driving.
 
@@ -24,7 +25,8 @@ Flips are fine as long as you don't land on the driver. A run ends when:
 
 - **The driver's head hits the ground.** Each vehicle has a head zone on the roof right above the driver. If the ground touches it, at any speed, the run is over. In practice, landing roughly upside down (from about 135° to 240° of rotation) is fatal for all three vehicles. Landing on the wheels, the nose or the tail is survivable.
 - **You stay flipped or stuck.** If the vehicle is on its side or tail, or wedged with no wheels down, and isn't moving, a 4-second countdown appears. Tilt with `←` / `→` to roll back onto your wheels before it runs out.
-- **The tank runs dry** before the next refill.
+- **The tank stays empty.** At 0% an "OUT OF FUEL" panel starts a 30-second countdown while you coast. Any refill or fuel gift clears it, and it starts again from 30 if you run dry again. Press **End run** or `Enter` to stop waiting.
+- **A viewer sends KABOOM** (see below). The score goes back to 0 and the next vehicle starts straight away.
 
 ## Vehicles
 
@@ -71,6 +73,20 @@ There are three ways to trigger a swap:
 1. **Keys**, for stream tools that can press a key when a viewer sends a gift or a chat command (for example TikFinity's keystroke actions): `1`–`3` pick a vehicle, `4`–`8` pick a map, `V` is the next vehicle and `B` is the next map. The game's browser window has to be the focused window for simulated keys to reach it.
 2. **Script API** on the page: `HillClimbRescue.vehicle("police")`, `HillClimbRescue.map("moon")`, `HillClimbRescue.nextVehicle()`, `HillClimbRescue.nextMap()`. The IDs are listed in `HillClimbRescue.vehicles` and `HillClimbRescue.maps`.
 3. **postMessage**, for an overlay that embeds the game in an iframe: `frame.contentWindow.postMessage({ type: "hill-climb-rescue", vehicle: "fire", map: "volcano" }, "*")`, or `next: "vehicle"` / `next: "map"`.
+
+## Viewer gifts
+
+Stream tools can tie these to gifts, the same way as live swaps. Each one is a key, a script call and a postMessage action.
+
+| Gift | Key | Script call | What it does |
+|---|---|---|---|
+| **Add fuel** | `F` | `HillClimbRescue.addFuel(2)` | +2% each by default. The tank can overfill up to 1000%, and the HUD shows the percentage. Quick gifts add up into one notice, like "+28% FUEL". |
+| **Remove fuel** | `G` | `HillClimbRescue.removeFuel(2)` | −2% each by default. |
+| **Jail** | `J` | `HillClimbRescue.jail(15)` | A cage drops over the vehicle with a countdown. Vehicle, distance and fuel freeze for 15 s. More jail gifts add time, up to 60 s. |
+| **KABOOM** | `K` | `HillClimbRescue.kaboom()` | The vehicle explodes: wheels fly off and the charred body tumbles. Pills and best distance are banked, the score goes back to 0, and a circle wipe reveals a different vehicle on the same map. |
+| **Air medevac** | `R` | `HillClimbRescue.helicopter()` | A medical helicopter flies you 5,000 m down the course in about 9 s, then sets you down on a gentle stretch of road. Fuel is paused and no pills are collected on the way. More gifts add 5,000 m to the flight. It also frees you from jail. |
+
+Gifts sent while the helicopter is flying wait until it lands, except KABOOM, which is ignored. With postMessage, use `{ type: "hill-climb-rescue", action: "addFuel", amount: 200 }`.
 
 ## How it works
 
