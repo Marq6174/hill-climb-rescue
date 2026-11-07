@@ -138,6 +138,7 @@
     background: var(--white); border: 3px solid var(--ink); border-radius: 16px;
     padding: 12px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px 12px; align-items: center;
   }
+  .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .card.flash { animation: flash 0.5s ease; }
   .card-icon { width: 52px; height: 52px; border-radius: 14px; border: 3px solid var(--ink); display: grid; place-items: center; }
   .card-icon svg { width: 34px; height: 34px; }
@@ -200,7 +201,6 @@
   .bars { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 8px; align-items: center; margin-top: 6px; font-size: 11px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
   .bar { height: 7px; border-radius: 4px; background: #dbe2ea; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--blue); border-radius: 4px; }
-  .pick h3 .key { min-width: 22px; height: 22px; font-size: 12px; margin-left: auto; }
   .badge { font-family: var(--font-body); font-weight: 900; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--ink); color: var(--gold); }
   .picks.maps .pick { grid-template-columns: 1fr; padding: 8px; gap: 6px; }
   .picks.maps .pick-art { width: 100%; height: 64px; border-radius: 10px; }
@@ -284,15 +284,6 @@
   .dist small { font-size: 0.55em; margin-left: 4px; }
   .hud-right { display: flex; gap: 10px; justify-content: flex-end; }
 
-  #keys-hint {
-    position: fixed; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 132px); transform: translateX(-50%);
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; align-items: center;
-    background: rgba(20,33,43,0.82); color: var(--white); border-radius: 16px; padding: 10px 16px;
-    font-weight: 800; font-size: 14px; pointer-events: none; max-width: calc(100% - 32px);
-    animation: hint 7s ease forwards;
-  }
-  #keys-hint span { display: inline-flex; align-items: center; gap: 6px; }
-
   /* ---------- Touch controls ---------- */
   #touch {
     position: fixed; left: 0; right: 0; bottom: 0;
@@ -342,7 +333,6 @@
   .out-fill { height: 100%; background: var(--o2); transform-origin: left center; }
   #out-panel.urgent .out-fill { background: var(--red); }
   #out-panel.urgent .out-time { color: var(--red); }
-  .out-hint { margin: 2px 0 0; font-size: 12.5px; font-weight: 800; color: var(--ink-soft); }
   .out-end { border: 2px solid var(--ink); border-radius: 9px; background: var(--white); font-weight: 900; font-size: 12px; padding: 3px 10px; cursor: pointer; margin-top: 2px; }
 
   /* ---------- Biome banner ---------- */
@@ -427,7 +417,6 @@
     78% { opacity: 1; transform: translate(-50%, 0) scale(1); }
     100% { opacity: 0; transform: translate(-50%, -8px) scale(1); }
   }
-  @keyframes hint { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
     #banner.show { animation: none; opacity: 1; }
@@ -470,13 +459,6 @@
   </div>
 </div>
 
-<div id="keys-hint" hidden>
-  <span><span class="key">A</span><span class="key">D</span> reverse / gas</span>
-  <span><span class="key">←</span><span class="key">→</span> tilt</span>
-  <span id="hint-ability" hidden><span class="key">W</span> <span id="hint-ability-name">nitro</span></span>
-  <span><span class="key">H</span> siren</span>
-</div>
-
 <!-- Touch controls -->
 <div id="touch" hidden>
   <div class="pad pad-left">
@@ -499,7 +481,6 @@
   <h2 id="out-title">OUT OF FUEL</h2>
   <div class="out-time"><span id="out-sec">30</span><small>s</small></div>
   <div class="out-track"><div class="out-fill" id="out-fill"></div></div>
-  <p class="out-hint">Send gifts to refuel!</p>
   <button class="out-end" id="out-end" type="button">End run</button>
 </div>
 
@@ -515,8 +496,8 @@
         <div class="stat"><span class="stat-label">Pills</span><span class="stat-val"><svg class="pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pill"/></svg><span id="bank">0</span></span></div>
         <div class="stat"><span class="stat-label">Best</span><span class="stat-val"><span id="g-best">0</span> m</span></div>
         <div class="g-toggles">
-          <button class="icon-btn" id="g-music" type="button" aria-label="Music" title="Music (N)"><svg viewBox="0 0 24 24"><use href="#i-music"/></svg></button>
-          <button class="icon-btn" id="g-sound" type="button" aria-label="Sound" title="Sound (M)"><svg viewBox="0 0 24 24"><use href="#i-sound"/></svg></button>
+          <button class="icon-btn" id="g-music" type="button" aria-label="Music" title="Music (0)"><svg viewBox="0 0 24 24"><use href="#i-music"/></svg></button>
+          <button class="icon-btn" id="g-sound" type="button" aria-label="Sound" title="Sound (9)"><svg viewBox="0 0 24 24"><use href="#i-sound"/></svg></button>
         </div>
       </div>
     </header>
@@ -531,11 +512,11 @@
       <div class="cards" id="cards"></div>
     </div>
     <div class="panel" id="panel-vehicles" role="tabpanel" aria-labelledby="tab-vehicles" hidden>
-      <p class="g-sub">Choose your rescue vehicle · live keys 1–3</p>
-      <div class="picks" id="veh-list"></div>
+      <p class="g-sub">Choose your rescue vehicle</p>
+      <div class="picks maps" id="veh-list"></div>
     </div>
     <div class="panel" id="panel-maps" role="tabpanel" aria-labelledby="tab-maps" hidden>
-      <p class="g-sub">Choose where to drive · live keys 4–8</p>
+      <p class="g-sub">Choose where to drive</p>
       <div class="picks maps" id="map-list"></div>
     </div>
     <div class="panel" id="panel-calls" role="tabpanel" aria-labelledby="tab-calls" hidden>
@@ -550,12 +531,10 @@
       <p class="help" id="help-keys">
         <span><span class="key">A</span><span class="key">D</span> reverse / gas</span>
         <span><span class="key">←</span><span class="key">→</span> tilt</span>
-        <span><span class="key">W</span> nitro / water</span>
+        <span><span class="key">W</span> special</span>
         <span><span class="key">H</span> siren</span>
         <span><span class="key">Esc</span> pause</span>
-        <span><span class="key">M</span><span class="key">N</span> sound / music</span>
-        <span><span class="key">1</span>–<span class="key">8</span> <span class="key">V</span><span class="key">B</span> live swaps</span>
-        <span><span class="key">F</span><span class="key">G</span><span class="key">J</span><span class="key">K</span><span class="key">R</span> gifts</span>
+        <span><span class="key">9</span><span class="key">0</span> sound / music</span>
       </p>
       <p class="help" id="help-touch" hidden>Pedals drive and reverse. The round buttons tilt your vehicle. The blue button fires nitro or the water cannon.</p>
       <button class="btn btn-go btn-drive" id="btn-drive" type="button">Drive <svg viewBox="0 0 24 24"><use href="#i-go"/></svg></button>
@@ -645,6 +624,15 @@
     <symbol id="v-ambulance" viewBox="0 0 64 32"><rect x="3" y="7" width="37" height="17" rx="2.5" fill="#fff" stroke="#14212b" stroke-width="2"/><path d="M40 11h8.5l7.5 7.5V24H40z" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M42.5 13h5l4.5 5h-9.5z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="4" y="18" width="51" height="3" fill="#e23b3b"/><path d="M17 9.5h3.2v3.2h3.2v3.2h-3.2v3.2H17v-3.2h-3.2v-3.2H17z" fill="#1f6fd1"/><rect x="29" y="3.5" width="5" height="3.5" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.2"/><rect x="34" y="3.5" width="5" height="3.5" rx="1" fill="#1f6fd1" stroke="#14212b" stroke-width="1.2"/><circle cx="13" cy="25" r="5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="13" cy="25" r="2" fill="#c9d2db"/><circle cx="48" cy="25" r="5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="48" cy="25" r="2" fill="#c9d2db"/></symbol>
     <symbol id="v-police" viewBox="0 0 64 32"><path d="M3.5 17.5 6 13.5h14l6-6h13.5l6.5 6h12.5q3 0 3 3.2v6H3.5z" fill="#1c2530" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="19" y="14" width="27" height="7.5" fill="#fff"/><path d="M27 9.5h12l4.5 4.5H22.5z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><path d="M32.5 15.4l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="#ffc531" stroke="#14212b" stroke-width=".6"/><rect x="27.5" y="4" width="5.5" height="3.5" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.2"/><rect x="33" y="4" width="5.5" height="3.5" rx="1" fill="#1f6fd1" stroke="#14212b" stroke-width="1.2"/><path d="M3.5 17.5 6 13.5h14l6-6h13.5l6.5 6h12.5q3 0 3 3.2v6H3.5z" fill="none" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="14" cy="24.5" r="4.6" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="14" cy="24.5" r="1.8" fill="#c9d2db"/><circle cx="50" cy="24.5" r="4.6" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="50" cy="24.5" r="1.8" fill="#c9d2db"/></symbol>
     <symbol id="v-fire" viewBox="0 0 64 32"><rect x="2.5" y="9" width="40" height="15" rx="2" fill="#d8312f" stroke="#14212b" stroke-width="2"/><path d="M42.5 7h13.5l5.5 6.5V24h-19z" fill="#d8312f" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M47 9.5h7.5l4 5H47z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="3.5" y="17" width="58" height="2.5" fill="#fff"/><rect x="3.5" y="19.5" width="58" height="1.2" fill="#ffc531"/><g stroke="#9aa6b1" stroke-width="1.6"><path d="M4 4.5h44M4 7.5h44"/><path d="M8 4.5v3M13 4.5v3M18 4.5v3M23 4.5v3M28 4.5v3M33 4.5v3M38 4.5v3M43 4.5v3" stroke-width="1.2"/></g><rect x="48" y="4" width="7" height="3" rx="1" fill="#e23b3b" stroke="#14212b" stroke-width="1.1"/><circle cx="11" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="11" cy="25" r="1.8" fill="#c9d2db"/><circle cx="22" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="22" cy="25" r="1.8" fill="#c9d2db"/><circle cx="53" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="53" cy="25" r="1.8" fill="#c9d2db"/></symbol>
+    <symbol id="v-retro" viewBox="0 0 64 32"><path d="M3 6h36v5h9l7 7v6H3z" fill="#f3e7cf" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M41 13h6l4.5 5H41z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="4" y="16" width="50" height="3" fill="#e8742c"/><path d="M17 8h3v3h3v3h-3v2h-3v-2h-3v-3h3z" fill="#e23b3b"/><rect x="33" y="2.5" width="4" height="3.5" rx="1.5" fill="#e23b3b" stroke="#14212b" stroke-width="1.2"/><circle cx="13" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="13" cy="25" r="1.8" fill="#c9d2db"/><circle cx="47" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="47" cy="25" r="1.8" fill="#c9d2db"/></symbol>
+    <symbol id="v-moto" viewBox="0 0 64 32"><path d="M16 24 26 15h14l8 9" fill="none" stroke="#14212b" stroke-width="3" stroke-linejoin="round"/><rect x="9" y="12" width="11" height="8" rx="1.5" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M14 13.5v5M11.5 16h5" stroke="#e23b3b" stroke-width="2"/><path d="M26 15q2-6 6-8l5 1-2 7z" fill="#e23b3b" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="36" cy="5" r="4" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="14" cy="25" r="5.5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="14" cy="25" r="2.1" fill="#c9d2db"/><circle cx="48" cy="25" r="5.5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="48" cy="25" r="2.1" fill="#c9d2db"/></symbol>
+    <symbol id="v-sports" viewBox="0 0 64 32"><path d="M3 19 8 15h13l7-5h13l8 5h9q3 1 3 4v4H3z" fill="#d62830" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M28 11.5h12l5.5 3.5H24z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 12h6v3H4z" fill="#14212b"/><path d="M31 17h3v2h2v3h-2v2h-3v-2h-2v-3h2z" fill="#fff"/><circle cx="14" cy="24.5" r="4.4" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="14" cy="24.5" r="1.7" fill="#c9d2db"/><circle cx="50" cy="24.5" r="4.4" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="50" cy="24.5" r="1.7" fill="#c9d2db"/></symbol>
+    <symbol id="v-snow" viewBox="0 0 64 32"><rect x="8" y="20" width="26" height="9" rx="4.5" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><path d="M8 19h24l5-8h9l6 9v3H34v-1H8z" fill="#2373be" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M38 27h16q6 0 8-3" fill="none" stroke="#14212b" stroke-width="3" stroke-linecap="round"/><path d="M50 22v5" stroke="#14212b" stroke-width="2"/><circle cx="26" cy="6" r="4" fill="#ff9f1a" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M23 10h6l3 8h-11z" fill="#ff9f1a" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="v-train" viewBox="0 0 64 32"><rect x="2" y="4" width="20" height="20" rx="1.5" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="6" y="7" width="10" height="7" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="22" y="11" width="32" height="13" rx="3" fill="#e23b3b" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="44" y="4" width="6" height="7" fill="#34404b" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M54 24l8 4H54z" fill="#34404b" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M9 16.5h3v2h2v3h-2v2H9v-2H7v-3h2z" fill="#e23b3b"/><circle cx="10" cy="27" r="3.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="10" cy="27" r="1.4" fill="#c9d2db"/><circle cx="21" cy="27" r="3.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="21" cy="27" r="1.4" fill="#c9d2db"/><circle cx="36" cy="27" r="3.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="36" cy="27" r="1.4" fill="#c9d2db"/><circle cx="47" cy="27" r="3.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="47" cy="27" r="1.4" fill="#c9d2db"/></symbol>
+    <symbol id="v-truck" viewBox="0 0 64 32"><rect x="2" y="3" width="38" height="20" rx="1.5" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M40 8h13l8 8v8H40z" fill="#1f6fd1" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M45 10.5h7l5 5.5H45z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><path d="M18 7h4v5h5v4h-5v5h-4v-5h-5v-4h5z" fill="#e23b3b"/><circle cx="10" cy="25" r="5.2" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="10" cy="25" r="2.0" fill="#c9d2db"/><circle cx="23" cy="25" r="5.2" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="23" cy="25" r="2.0" fill="#c9d2db"/><circle cx="52" cy="25" r="5.2" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="52" cy="25" r="2.0" fill="#c9d2db"/></symbol>
+    <symbol id="v-bus" viewBox="0 0 64 32"><rect x="2" y="4" width="59" height="20" rx="3" fill="#fae28c" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><g fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"><rect x="6" y="8" width="9" height="7"/><rect x="18" y="8" width="9" height="7"/><rect x="30" y="8" width="9" height="7"/><rect x="42" y="8" width="9" height="7"/></g><path d="M54 8h4l1 8h-5z" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="3" y="17" width="57" height="3" fill="#2b9c82"/><circle cx="13" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="13" cy="25" r="1.8" fill="#c9d2db"/><circle cx="50" cy="25" r="4.8" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="50" cy="25" r="1.8" fill="#c9d2db"/></symbol>
+    <symbol id="v-boat" viewBox="0 0 64 32"><path d="M2 12h44l15 7-6 6H6z" fill="#f06e1e" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="3" y="16" width="52" height="2.5" fill="#fff"/><rect x="18" y="3" width="16" height="9" rx="1.5" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><rect x="25" y="5" width="7" height="5" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><rect x="24" y="0.5" width="4" height="2.5" fill="#e23b3b"/><circle cx="18" cy="27" r="4" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="18" cy="27" r="1.5" fill="#c9d2db"/><circle cx="42" cy="27" r="4" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="42" cy="27" r="1.5" fill="#c9d2db"/></symbol>
+    <symbol id="v-lander" viewBox="0 0 64 32"><path d="M18 22 8 28M46 22l10 6" stroke="#14212b" stroke-width="2.4"/><path d="M16 14h32l3 5-3 5H16l-3-5z" fill="#dab246" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><path d="M23 14V8l4-5h10l4 5v6z" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="9" r="3" fill="#7cc4ef" stroke="#14212b" stroke-width="1.4" stroke-linejoin="round"/><path d="M27 24h10l2 4H25z" fill="#5d6b78" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="28" r="3" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="7" cy="28" r="1.1" fill="#c9d2db"/><circle cx="57" cy="28" r="3" fill="#1f262d" stroke="#14212b" stroke-width="1.5"/><circle cx="57" cy="28" r="1.1" fill="#c9d2db"/></symbol>
     <symbol id="i-tank" viewBox="0 0 32 32"><rect x="12.5" y="2" width="7" height="4.5" rx="1.2" fill="#9aa6b1" stroke="#14212b" stroke-width="2"/><rect x="7.5" y="6" width="17" height="24" rx="7.5" fill="currentColor" stroke="#14212b" stroke-width="2"/><rect x="10" y="13" width="12" height="9" rx="2" fill="#fff" stroke="#14212b" stroke-width="1.5"/><text x="16" y="20.4" text-anchor="middle" font-family="Bungee, Arial Black, sans-serif" font-size="7" fill="#14212b">O2</text></symbol>
   </defs>
 </svg>
@@ -695,11 +683,12 @@
   // st values are [base, per level]. parts are chassis fixtures in local metres (box: half-w, half-h, cx, cy).
   const VEHICLES = [
     {
-      id: "ambulance", name: "Ambulance", noun: "ambulance", costMul: 1, icon: "v-ambulance",
+      id: "ambulance", name: "Ambulance", noun: "ambulance", costMul: 1, icon: "v-ambulance", draw: drawAmbulanceBody, reserve: true,
+      labels: [{ t: "AMBULANCE", x: -0.52, y: 0.225, size: 0.17, color: "#ffffff" }], debris: [[226, 59, 59], [255, 255, 255], [160, 210, 240]],
       res: "o2", ability: null, gauge: "hr",
       role: "All-rounder", traits: "Balanced speed, grip, fuel and air control. A good first pick on any map.",
       perk: "<b>Reserve O₂:</b> once per run, a backup tank kicks in when you run dry.",
-      st: { torque: [15, 3.6], speed: [22, 3.2], hz: [2.5, 0.32], damp: [0.42, 0.04], grip: [0.9, 0.1], tank: [34, 7] },
+      st: { torque: [15, 3.6], speed: [22, 3.2], hz: [2.5, 0.32], damp: [0.42, 0.04], grip: [0.9, 0.1], tank: [34, 0] },
       tilt: [3.2, 11], spin: 7,                                                         // tilt torque on the ground / in the air, max air spin (rad/s)
       wheelR: 0.42, wheelY: -0.42, wheels: [-0.95, 1.02], zoom: 1,
       parts: [
@@ -714,11 +703,12 @@
       engine: { base: 36, range: 92, cutoff: 260, rumble: 0.05 },
     },
     {
-      id: "police", name: "Police Cruiser", noun: "police cruiser", costMul: 1.2, icon: "v-police",
+      id: "police", name: "Police Cruiser", noun: "police cruiser", costMul: 1.2, icon: "v-police", draw: drawPoliceBody, rim: "dark",
+      labels: [{ t: "POLICE", x: -0.48, y: 0.2, size: 0.2, color: "#14212b" }], debris: [[28, 37, 48], [255, 255, 255], [160, 210, 240]],
       res: "fuel", ability: "nitro", gauge: "nitro",
       role: "Speedster", traits: "Fastest top speed and the quickest flips, but it's light, bouncy, slips on steep hills and burns fuel fast.",
       perk: "<b>Nitro:</b> hold <b>W</b> or the blue button for a burst of speed. It recharges as you drive.",
-      st: { torque: [11, 2.6], speed: [36, 5.0], hz: [3.4, 0.35], damp: [0.3, 0.03], grip: [0.55, 0.1], tank: [28, 5] },
+      st: { torque: [11, 2.6], speed: [36, 5.0], hz: [3.4, 0.35], damp: [0.3, 0.03], grip: [0.55, 0.1], tank: [28, 0] },
       tilt: [4.5, 15], spin: 9,
       wheelR: 0.38, wheelY: -0.36, wheels: [-1.02, 1.08], zoom: 1,
       parts: [
@@ -733,11 +723,12 @@
       engine: { base: 46, range: 122, cutoff: 340, rumble: 0.03 },
     },
     {
-      id: "fire", name: "Fire Engine", noun: "fire engine", costMul: 1.4, icon: "v-fire",
+      id: "fire", name: "Fire Engine", noun: "fire engine", costMul: 1.4, icon: "v-fire", draw: drawFireBody, bolts: "#e23b3b", shadow: 2.4, beaconCols: [[255, 60, 50], [255, 190, 60]],
+      labels: [{ t: "FIRE DEPT", x: -0.66, y: 0.7, size: 0.22, color: "#ffffff", stroke: 0.2 }, { t: "7", x: 1.03, y: 0.45, size: 0.26, color: "#ffc531", stroke: 0.22 }], debris: [[216, 49, 47], [255, 255, 255], [255, 197, 49]],
       res: "fuel", ability: "water", gauge: "water",
       role: "Heavy hauler", traits: "Slow, but it climbs almost anything, grips the best, carries the most fuel and barely bounces. Turns slowly in the air.",
       perk: "<b>Water cannon:</b> hold <b>W</b> or the blue button to spray. Put out fires on the road for bonus pills.",
-      st: { torque: [24, 4.6], speed: [15.5, 2.1], hz: [1.9, 0.25], damp: [0.55, 0.04], grip: [1.25, 0.1], tank: [44, 8] },
+      st: { torque: [24, 4.6], speed: [15.5, 2.1], hz: [1.9, 0.25], damp: [0.55, 0.04], grip: [1.25, 0.1], tank: [44, 0] },
       tilt: [2.0, 6.5], spin: 4.5,
       wheelR: 0.45, wheelY: -0.45, wheels: [-1.42, -0.52, 1.5], zoom: 0.88,
       parts: [
@@ -751,6 +742,176 @@
       nozzle: [1.52, 1.41], nozzleAngle: 0.2,
       siren: { type: "sawtooth", f: 760, depth: 430, rate: 0.2, cutoff: 1800 },
       engine: { base: 26, range: 64, cutoff: 200, rumble: 0.08 },
+    },
+    {
+      id: "retro", name: "90s Ambulance", noun: "old ambulance", costMul: 0.8, icon: "v-retro", draw: drawRetroBody, reserve: true,
+      labels: [{ t: "AMBULANCE", x: -0.5, y: 0.3, size: 0.15, color: "#ffffff" }], debris: [[243, 231, 207], [232, 116, 44], [160, 210, 240]],
+      res: "o2", ability: null, gauge: "hr",
+      role: "Old timer", traits: "Slow and floaty on worn-out springs, but cheap to upgrade and it just keeps going.",
+      perk: "<b>Reserve O₂:</b> once per run, a backup tank kicks in when you run dry.",
+      st: { torque: [13, 3], speed: [15, 2.2], hz: [2.5, 0.28], damp: [0.24, 0.03], grip: [0.85, 0.1], tank: [40, 0] },
+      tilt: [2.8, 9], spin: 6,
+      wheelR: 0.4, wheelY: -0.4, wheels: [-1, 1.05], zoom: 1,
+      parts: [
+        { box: [1.5, 0.13, 0.02, -0.09], d: 2.6 },
+        { box: [1.08, 0.6, -0.52, 0.55], d: 0.45 },
+        { box: [0.5, 0.22, 1.08, 0.17], d: 1.8 },
+        { poly: [[0.56, 0.4], [1.18, 0.4], [0.95, 0.9], [0.56, 0.9]], d: 0.4 },
+        { box: [0.21, 0.18, 0.77, 1.02], head: true },
+      ],
+      exhaust: [-1.7, -0.12], headlight: [1.62, 0.24], taillight: [-1.62, 0.5], beacons: [[0.1, 1.27], [0.1, 1.27]], beaconCols: [[255, 70, 70], [255, 120, 60]],
+      siren: { type: "sine", f: 780, depth: 260, rate: 0.5, cutoff: 2200 },
+      engine: { base: 30, range: 62, cutoff: 220, rumble: 0.07 },
+    },
+    {
+      id: "moto", name: "Medical Motorcycle", noun: "medical motorcycle", costMul: 0.9, icon: "v-moto", draw: drawMotoBody, rim: "dark", arches: false, shadow: 1.2,
+      labels: [], debris: [[255, 255, 255], [226, 59, 59], [40, 50, 60]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Daredevil", traits: "Tiny, quick and flips in a blink, but the rider's head is right out in the open.",
+      perk: "<b>First responder:</b> the best spin in the air of anything in the garage.",
+      st: { torque: [7, 1.8], speed: [34, 5.2], hz: [3.2, 0.3], damp: [0.4, 0.03], grip: [0.68, 0.1], tank: [24, 0] },
+      tilt: [5, 18], spin: 10,
+      wheelR: 0.36, wheelY: -0.34, wheels: [-0.78, 0.82], zoom: 1.08,
+      parts: [
+        { box: [0.62, 0.1, 0.02, -0.02], d: 2.6 },
+        { box: [0.42, 0.13, -0.06, 0.22], d: 0.7 },
+        { box: [0.17, 0.17, 0.2, 1.02], head: true },
+      ],
+      exhaust: [-0.95, -0.02], headlight: [0.93, 0.34], taillight: [-0.88, 0.42], beacons: [[-0.8, 0.86], [-0.52, 0.86]],
+      siren: { type: "square", f: 1200, depth: 460, rate: 5, cutoff: 2800 },
+      engine: { base: 62, range: 170, cutoff: 460, rumble: 0.02 },
+    },
+    {
+      id: "sports", name: "Medical Sports Car", noun: "medical sports car", costMul: 1.5, icon: "v-sports", draw: drawSportsBody, rim: "dark",
+      labels: [{ t: "SPONSORED BY BACK PAIN", x: -0.12, y: 0.1, size: 0.135, color: "#ffffff" }], debris: [[214, 40, 48], [255, 255, 255], [40, 50, 60]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Supercar", traits: "The fastest thing in the game, sponsored by Back Pain. Almost no grip and a tiny tank.",
+      perk: "<b>Sponsored:</b> nothing in the garage has a higher top speed.",
+      st: { torque: [10, 2.6], speed: [42, 6.2], hz: [4, 0.4], damp: [0.42, 0.03], grip: [0.5, 0.1], tank: [22, 0] },
+      tilt: [4.5, 14], spin: 8.5,
+      wheelR: 0.36, wheelY: -0.3, wheels: [-1.08, 1.12], zoom: 1,
+      parts: [
+        { box: [1.62, 0.1, 0.03, -0.04], d: 2.2 },
+        { box: [1.7, 0.14, 0.03, 0.16], d: 0.3 },
+        { box: [0.4, 0.1, -0.9, 0.18], d: 1.4 },
+        { poly: [[-0.85, 0.3], [0.55, 0.3], [0.12, 0.66], [-0.5, 0.66]], d: 0.2 },
+        { box: [0.24, 0.07, -0.12, 0.7], head: true },
+      ],
+      exhaust: [-1.78, 0.03], headlight: [1.72, 0.2], taillight: [-1.74, 0.25], beacons: [[-0.3, 0.76], [0.02, 0.76]],
+      siren: { type: "square", f: 1100, depth: 380, rate: 4.2, cutoff: 2600 },
+      engine: { base: 58, range: 180, cutoff: 480, rumble: 0.03 },
+    },
+    {
+      id: "snow", name: "Medical Snowmobile", noun: "medical snowmobile", costMul: 1, icon: "v-snow", draw: drawSnowBody, over: drawSnowOver, arches: false, shadow: 1.5, iceProof: true, rim: "dark",
+      labels: [], debris: [[35, 115, 190], [255, 255, 255], [226, 59, 59]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Snow specialist", traits: "Light and nimble with a track that bites. The rider is exposed if it rolls.",
+      perk: "<b>Studded track:</b> ice doesn't make it slip at all.",
+      st: { torque: [7, 1.7], speed: [32, 4.4], hz: [2.6, 0.3], damp: [0.42, 0.04], grip: [0.8, 0.1], tank: [30, 0] },
+      tilt: [4, 14], spin: 8,
+      wheelR: 0.28, wheelY: -0.34, wheels: [-1, -0.32, 0.95], zoom: 1.04,
+      parts: [
+        { box: [1.1, 0.1, -0.02, -0.04], d: 2.4 },
+        { box: [0.45, 0.2, 0.6, 0.22], d: 0.8 },
+        { box: [0.55, 0.1, -0.45, 0.16], d: 0.6 },
+        { box: [0.17, 0.17, 0, 1.0], head: true },
+      ],
+      exhaust: [-1.22, 0.02], headlight: [1.05, 0.32], taillight: [-1.12, 0.3], beacons: [[-1.02, 0.78], [-1.02, 0.78]],
+      siren: { type: "square", f: 1000, depth: 380, rate: 4, cutoff: 2400 },
+      engine: { base: 54, range: 140, cutoff: 420, rumble: 0.04 },
+    },
+    {
+      id: "train", name: "Medical Train", noun: "medical train", costMul: 1.6, icon: "v-train", draw: drawTrainBody, over: drawTrainOver, arches: false, shadow: 3, zoom: 0.78, bolts: "#e23b3b",
+      labels: [{ t: "MEDICAL", x: 0.85, y: 0.42, size: 0.2, color: "#14212b" }], debris: [[255, 255, 255], [226, 59, 59], [40, 50, 60]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Slowest of all", traits: "Barely faster than walking, but it weighs a ton and drags itself up nearly anything.",
+      perk: "<b>Steam power:</b> four driven axles and the biggest tank in the game.",
+      st: { torque: [20, 3.8], speed: [12, 1.6], hz: [3.4, 0.3], damp: [0.6, 0.03], grip: [1.35, 0.1], tank: [60, 0] },
+      tilt: [1.6, 4.5], spin: 3.2,
+      wheelR: 0.36, wheelY: -0.38, wheels: [-2, -1, 0.95, 1.95],
+      parts: [
+        { box: [2.55, 0.15, 0, -0.06], d: 4 },
+        { box: [0.95, 0.72, -1.55, 0.72], d: 0.45 },
+        { box: [1.45, 0.42, 0.88, 0.5], d: 1.1 },
+        { box: [0.42, 0.08, -1.55, 1.5], head: true },
+      ],
+      exhaust: [1.6, 1.3], headlight: [2.42, 0.62], taillight: [-2.52, 0.4], beacons: [[-1.8, 1.53], [-1.3, 1.53]],
+      siren: { type: "triangle", f: 520, depth: 90, rate: 0.12, cutoff: 1400 },
+      engine: { base: 22, range: 38, cutoff: 170, rumble: 0.1 },
+    },
+    {
+      id: "truck", name: "Medical Supply Truck", noun: "supply truck", costMul: 1.3, icon: "v-truck", draw: drawTruckBody, shadow: 2.4, zoom: 0.88,
+      labels: [{ t: "MEDICAL SUPPLIES", x: -0.7, y: 0.74, size: 0.17, color: "#1f6fd1" }], debris: [[255, 255, 255], [31, 111, 209], [40, 50, 60]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Workhorse", traits: "Big wheels, plenty of pull and a decent top speed. Tall, so watch it on landings.",
+      perk: "<b>Monster tires:</b> the largest wheels in the garage roll over rough ground.",
+      st: { torque: [20, 4.2], speed: [18, 2.5], hz: [2.2, 0.28], damp: [0.45, 0.04], grip: [1.05, 0.1], tank: [46, 0] },
+      tilt: [2.3, 7], spin: 5,
+      wheelR: 0.5, wheelY: -0.48, wheels: [-1.66, -0.56, 1.55],
+      parts: [
+        { box: [2.1, 0.16, 0, -0.08], d: 3.4 },
+        { box: [1.4, 0.75, -0.7, 0.72], d: 0.3 },
+        { box: [0.66, 0.62, 1.35, 0.56], d: 0.6 },
+        { box: [0.3, 0.22, 1.4, 1.32], head: true },
+      ],
+      exhaust: [-2.2, -0.1], headlight: [2.02, 0.3], taillight: [-2.12, 0.5], beacons: [[1.18, 1.26], [1.62, 1.26]],
+      siren: { type: "triangle", f: 880, depth: 300, rate: 0.4, cutoff: 2400 },
+      engine: { base: 28, range: 72, cutoff: 220, rumble: 0.09 },
+    },
+    {
+      id: "bus", name: "Senior Shuttle Bus", noun: "senior shuttle", costMul: 1.1, icon: "v-bus", draw: drawBusBody, shadow: 2.6, zoom: 0.86,
+      labels: [{ t: "GOLDEN YEARS SHUTTLE", x: -0.1, y: 0.28, size: 0.17, color: "#ffffff" }], debris: [[250, 226, 140], [255, 255, 255], [160, 210, 240]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Top heavy", traits: "Slow, tall and bouncy with a full load of seniors. Tips over easily, so take it gently.",
+      perk: "<b>Full bus:</b> soft springs soak up bumps, and it holds plenty of fuel.",
+      st: { torque: [18, 3.8], speed: [14, 1.9], hz: [2.7, 0.26], damp: [0.26, 0.03], grip: [0.92, 0.1], tank: [50, 0] },
+      tilt: [2.2, 6.5], spin: 4.5,
+      wheelR: 0.42, wheelY: -0.42, wheels: [-1.55, 1.6],
+      parts: [
+        { box: [2.2, 0.14, 0.02, -0.08], d: 2.2 },
+        { box: [2.25, 0.72, 0.02, 0.62], d: 0.22 },
+        { box: [0.32, 0.1, 1.5, 1.38], head: true },
+      ],
+      exhaust: [-2.32, -0.1], headlight: [2.28, 0.3], taillight: [-2.28, 0.5], beacons: [[0.2, 1.42], [0.62, 1.42]],
+      siren: { type: "triangle", f: 700, depth: 200, rate: 0.5, cutoff: 2000 },
+      engine: { base: 26, range: 58, cutoff: 210, rumble: 0.08 },
+    },
+    {
+      id: "boat", name: "Rescue Boat", noun: "rescue boat", costMul: 1.1, icon: "v-boat", draw: drawBoatBody, arches: false, shadow: 2, rim: "dark", zoneProof: ["water"],
+      labels: [{ t: "RESCUE", x: 0, y: 0.34, size: 0.24, color: "#ffffff" }], debris: [[240, 110, 30], [255, 255, 255], [40, 50, 60]],
+      res: "fuel", ability: null, gauge: "hr",
+      role: "Water specialist", traits: "A boat on a trailer, which is about as silly as it sounds. Average on land.",
+      perk: "<b>It floats:</b> water puddles don't slow it down at all.",
+      st: { torque: [14, 3.2], speed: [24, 3.4], hz: [2.4, 0.3], damp: [0.42, 0.04], grip: [0.82, 0.1], tank: [34, 0] },
+      tilt: [3, 10], spin: 6.5,
+      wheelR: 0.38, wheelY: -0.45, wheels: [-0.95, 0.85], zoom: 0.96,
+      parts: [
+        { box: [1.4, 0.08, 0, -0.1], d: 3 },
+        { poly: [[-1.7, 0.02], [1.35, 0.02], [1.95, 0.62], [-1.7, 0.62]], d: 0.4 },
+        { box: [0.5, 0.35, -0.35, 0.97], d: 0.25 },
+        { box: [0.3, 0.07, -0.35, 1.38], head: true },
+      ],
+      exhaust: [-1.88, 0.18], headlight: [1.9, 0.55], taillight: [-1.72, 0.42], beacons: [[-0.62, 1.44], [-0.1, 1.44]],
+      siren: { type: "triangle", f: 640, depth: 240, rate: 0.6, cutoff: 2200 },
+      engine: { base: 38, range: 90, cutoff: 300, rumble: 0.06 },
+    },
+    {
+      id: "lander", name: "Moon Lander", noun: "moon lander", costMul: 1.4, icon: "v-lander", draw: drawLanderBody, arches: false, shadow: 1.5, rim: "dark",
+      labels: [], debris: [[218, 178, 70], [255, 255, 255], [90, 100, 112]],
+      res: "o2", ability: "thrust", gauge: "thrust",
+      role: "Hopper", traits: "Long legs and small wheels make it slow on the road, but it can fly over trouble.",
+      perk: "<b>Thrusters:</b> hold <b>W</b> or the blue button to lift off. They recharge as you drive.",
+      st: { torque: [10, 2.4], speed: [25, 3.4], hz: [2.6, 0.25], damp: [0.5, 0.04], grip: [0.88, 0.1], tank: [40, 0] },
+      tilt: [4, 14], spin: 7,
+      wheelR: 0.32, wheelY: -0.62, wheels: [-1.05, 1.05], zoom: 0.96,
+      parts: [
+        { box: [0.8, 0.12, 0, -0.2], d: 2.8 },
+        { box: [0.72, 0.5, 0, 0.35], d: 0.5 },
+        { box: [0.3, 0.1, 0.1, 1.2], head: true },
+      ],
+      exhaust: [0, -0.42], headlight: [0.74, 0.4], taillight: [-0.74, 0.3], beacons: [[-0.3, 1.26], [0.3, 1.26]],
+      siren: { type: "sine", f: 1300, depth: 500, rate: 1.4, cutoff: 3000 },
+      engine: { base: 40, range: 90, cutoff: 500, rumble: 0.03 },
     },
   ];
   for (const v of VEHICLES) { const h = v.parts.find((p) => p.head); v.head = [h.box[2], h.box[3]]; }
@@ -770,14 +931,13 @@
   function vStats(v, up) {
     return {
       torque: sv(v, "torque", up.engine), speed: sv(v, "speed", up.engine), topKmh: sv(v, "speed", up.engine) * v.wheelR * 3.6,
-      hz: sv(v, "hz", up.susp), damp: sv(v, "damp", up.susp), grip: sv(v, "grip", up.tires), tank: sv(v, "tank", up.tank),
+      hz: sv(v, "hz", up.susp), damp: sv(v, "damp", up.susp), grip: sv(v, "grip", up.tires), tank: v.st.tank[0],
     };
   }
   const UPGRADES = [
     { id: "engine", name: () => "Engine", icon: () => "i-engine", color: () => "#ffc531", base: 250, label: () => "Top speed", value: (v, l) => Math.round(sv(v, "speed", l) * v.wheelR * 3.6), unit: " km/h" },
     { id: "susp", name: () => "Suspension", icon: () => "i-susp", color: () => "#7fb6f4", base: 200, label: () => "Bump absorption", value: (v, l) => 40 + l * 6, unit: "%" },
     { id: "tires", name: () => "Tires", icon: () => "i-tire", color: () => "#e3e9ee", base: 200, label: () => "Grip", value: (v, l) => Math.round((sv(v, "grip", l) * 100) / 0.9), unit: "%" },
-    { id: "tank", name: (v) => RES[v.res].tank, icon: (v) => RES[v.res].icon, color: (v) => RES[v.res].color, base: 250, label: (v) => RES[v.res].label, value: (v, l) => sv(v, "tank", l), unit: " s" },
   ];
   const costOf = (u, l, v) => Math.round((u.base * Math.pow(1.5, l) * v.costMul) / 10) * 10;
 
@@ -824,11 +984,58 @@
     return h + x * 0.02;
   }
 
+  // Stretches of water, mud or thick forest that drag at your wheels. Water and mud sit in bowls in the ground.
+  const zoneCell = (z, c) => ({ cx: c * z.cell + z.cell / 2 + (hash(c, z.seed) - 0.5) * z.cell * 0.35, r: z.r[0] + hash(c, z.seed + 1) * (z.r[1] - z.r[0]) });
+  function zoneAt(z, x) {
+    const c0 = Math.floor(x / z.cell);
+    for (let c = c0 - 1; c <= c0 + 1; c++) {
+      const q = zoneCell(z, c);
+      if (q.cx > 60 && Math.abs(x - q.cx) < q.r) return q;
+    }
+    return null;
+  }
+  const withBowls = (base, z) => (x) => {
+    const q = zoneAt(z, x);
+    if (!q) return base(x);
+    // The ground levels off across the zone so water and mud lie flat in their bowl, even on a hillside
+    const d = (x - q.cx) / q.r, flat = smooth(1, 0.65, Math.abs(d));
+    return lerp(base(x), base(q.cx), flat) - z.depth * (1 - d * d);
+  };
+  const highwayH = (x) => (1 + Math.min(x / 500, 2)) * (0.7 * Math.sin(x * 0.011 + 1) + 0.3 * Math.sin(x * 0.027)) + x * 0.008;
+  const mountainH = (x) => (1.5 + Math.min(x / 60, 10)) * (0.6 * Math.sin(x * 0.037 + 0.8) + 0.4 * Math.sin(x * 0.09 + 2) + 0.15 * Math.sin(x * 0.25)) + x * 0.08;
+  const seasonsH = (x) => (1 + Math.min(x / 140, 7)) * (0.55 * Math.sin(x * 0.046 + 2) + 0.4 * Math.sin(x * 0.097 + 0.9) + 0.18 * Math.sin(x * 0.21)) + x * 0.03;
+  const beachH = (x) => (0.8 + Math.min(x / 300, 2.5)) * (0.7 * Math.sin(x * 0.03 + 0.5) + 0.3 * Math.sin(x * 0.075 + 1)) + x * 0.006;
+  const caveH = (x) => (1 + Math.min(x / 150, 6)) * (0.55 * Math.sin(x * 0.06 + 1) + 0.4 * Math.sin(x * 0.14 + 2) + 0.2 * Math.sin(x * 0.33)) + 0.15 * Math.sin(x * 1.3) * Math.min(1, x / 300) + x * 0.01;
+  const coasterH = (x) => (3 + Math.min(x / 60, 11)) * (0.8 * Math.sin(x * 0.055 + 1.2) + 0.25 * Math.sin(x * 0.13)) + x * 0.015;
+  const arenaH = (x) => {
+    const f = x / 36 - Math.floor(x / 36), big = 1.6 + Math.min(x / 300, 2.2);
+    const ramp = f < 0.5 ? (f / 0.5) * big : f < 0.56 ? big : f < 0.66 ? big * (1 - (f - 0.56) / 0.1) : 0;
+    return ramp + 0.12 * Math.sin(x * 1.4) * Math.min(1, x / 150);
+  };
+  const LOG_CELL = 26;
+  const logAt = (c) => ({ cx: c * LOG_CELL + 13 + (hash(c, 111) - 0.5) * 10, r: 0.38 + hash(c, 112) * 0.22 });
+  const forestH = (x) => {
+    let h = (1 + Math.min(x / 200, 4)) * (0.6 * Math.sin(x * 0.05 + 0.4) + 0.35 * Math.sin(x * 0.11 + 1.4)) + x * 0.02;
+    const c0 = Math.floor(x / LOG_CELL);
+    for (let c = c0 - 1; c <= c0 + 1; c++) {
+      const q = logAt(c), d = (x - q.cx) / (q.r * 1.7);
+      if (q.cx > 60 && Math.abs(d) < 1) h += Math.sqrt(1 - d * d) * q.r * 0.65;    // fallen trunks across the road
+    }
+    return h;
+  };
+  const ZONES = {
+    water: { kind: "water", cell: 52, r: [4, 8], depth: 0.7, drag: 3.4, seed: 121 },
+    mud: { kind: "mud", cell: 44, r: [6, 12], depth: 0.45, drag: 3.6, seed: 131 },
+    thicket: { kind: "thicket", cell: 72, r: [9, 17], depth: 0, drag: 2, seed: 141 },
+  };
+  const puddlesH = withBowls((x) => (1 + Math.min(x / 220, 4)) * (0.7 * Math.sin(x * 0.032 + 1.5) + 0.3 * Math.sin(x * 0.08)) + x * 0.015, ZONES.water);
+  const mudH = withBowls((x) => (0.8 + Math.min(x / 260, 3.5)) * (0.6 * Math.sin(x * 0.04) + 0.4 * Math.sin(x * 0.09 + 1.2)) + 0.08 * Math.sin(x * 1.1) * Math.min(1, x / 200) + x * 0.012, ZONES.mud);
+
   const MAPS = [
     {
-      id: "city", name: "City General", seed: 20261024, pay: 1, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15,
+      id: "city", name: "City Day", seed: 20261024, pay: 1, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15,
       o2: [190, 200, 32], fires: [70, 110, 90], music: [0, 108], lot: "#4b5661", station: "earth", town: "CITY", height: cityH,
-      blurb: "From the hospital out to the night highway.", mods: [["Balanced", ""], ["Pills ×1", ""]],
+      blurb: "From the hospital out to the mountains, in daylight.", mods: [["Balanced", ""], ["Pills ×1", ""]],
       biomes: [
         { name: "Hospital District", at: 0, far: "city", decor: [["lamp", 0.3], ["bush", 0.25], ["tree", 0.2], ["hsign", 0.06], ["bench", 0.07]], pal: {
           skyTop: "#4fa9f2", skyBot: "#c9ecff", sun: "#fff3c4", far: "#a7c8e2", mid: "#79c182", midDark: "#5ea56a",
@@ -839,9 +1046,74 @@
         { name: "Mountain Pass", at: 1200, far: "peaks", caps: 1, snow: 1, sunLow: 1, decor: [["pine", 0.45], ["rock", 0.22], ["pine", 0.1]], pal: {
           skyTop: "#5a8ed4", skyBot: "#f5d6b4", sun: "#ffcf8a", far: "#8794b4", mid: "#6e8571", midDark: "#55695a",
           grassTop: "#b1c283", grass: "#839a5d", soil: "#8f8376", soilDark: "#6d6358", stone: "#5b534a", tree: "#2f5e40", treeDark: "#234a32", trunk: "#5e4636" } },
-        { name: "Night Highway", at: 2200, far: "peaks", caps: 1, night: 1, decor: [["lamp", 0.32], ["pine", 0.2], ["bush", 0.15], ["hsign", 0.05]], pal: {
-          skyTop: "#0a1430", skyBot: "#2b3f74", sun: "#eef2ff", far: "#1f2c54", mid: "#19344b", midDark: "#112739",
-          grassTop: "#46947a", grass: "#2b6550", soil: "#3d344a", soilDark: "#2b2537", stone: "#221d2b", tree: "#1e4b3b", treeDark: "#143428", trunk: "#2e2633" } },
+      ],
+    },
+    {
+      id: "citynight", name: "City Night", seed: 20261024, pay: 1.1, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15,
+      o2: [190, 200, 32], fires: [70, 110, 90], music: [-3, 100], lot: "#3a434d", station: "earth", town: "CITY", height: cityH,
+      blurb: "The same streets after dark, lit by headlights and lamps.", mods: [["Night driving", "hard"], ["Pills ×1.1", "good"]],
+      biomes: [
+        { name: "Downtown Night", at: 0, far: "city", night: 1, decor: [["lamp", 0.45], ["bush", 0.15], ["tree", 0.12], ["hsign", 0.08], ["bench", 0.05]], pal: { skyTop: "#0a1430", skyBot: "#2b3f74", sun: "#eef2ff", far: "#1f2c54", mid: "#19344b", midDark: "#112739", grassTop: "#46947a", grass: "#2b6550", soil: "#3d344a", soilDark: "#2b2537", stone: "#221d2b", tree: "#1e4b3b", treeDark: "#143428", trunk: "#2e2633" } },
+        { name: "Moonlit Countryside", at: 450, far: "hills", night: 1, decor: [["tree", 0.32], ["bush", 0.18], ["fence", 0.14], ["hay", 0.1], ["lamp", 0.08]], pal: { skyTop: "#0c1838", skyBot: "#33487e", sun: "#eef2ff", far: "#22325a", mid: "#1d4a48", midDark: "#143632", grassTop: "#5aa080", grass: "#33755c", soil: "#44394e", soilDark: "#2f2839", stone: "#241f2d", tree: "#1f5a42", treeDark: "#143f2e", trunk: "#2e2633" } },
+        { name: "Night Highway", at: 1200, far: "peaks", caps: 1, night: 1, decor: [["lamp", 0.32], ["pine", 0.2], ["bush", 0.15], ["hsign", 0.05]], pal: { skyTop: "#0a1430", skyBot: "#2b3f74", sun: "#eef2ff", far: "#1f2c54", mid: "#19344b", midDark: "#112739", grassTop: "#46947a", grass: "#2b6550", soil: "#3d344a", soilDark: "#2b2537", stone: "#221d2b", tree: "#1e4b3b", treeDark: "#143428", trunk: "#2e2633" } },
+      ],
+    },
+    {
+      id: "highway", name: "Highway", seed: 3120, pay: 1, gravity: -12, friction: 1.2, iceFriction: 0.3, maxSlope: 1.0, surface: "road",
+      o2: [230, 240, 44], fires: [120, 170, 110], music: [2, 120], lot: "#4b5661", station: "earth", town: "HIGHWAY", height: highwayH,
+      blurb: "Smooth, grippy tarmac and long gentle hills. Built for speed.", mods: [["Smooth", "good"], ["Fast", "good"], ["Pills ×1", ""]],
+      biomes: [
+        { name: "Interstate", at: 0, far: "hills", tufts: 0, decor: [["lamp", 0.26], ["roadsign", 0.1], ["bush", 0.14]], pal: { skyTop: "#4aa3ee", skyBot: "#d9f0ff", sun: "#fff3c4", far: "#a4c6dd", mid: "#83bd80", midDark: "#66a36a", grassTop: "#b9c2cb", grass: "#4b5661", soil: "#a98a62", soilDark: "#856a48", stone: "#6e5638", tree: "#4f9e3f", treeDark: "#3a7d30", trunk: "#7a5233" } },
+        { name: "Suburbs", at: 700, far: "city", tufts: 0, decor: [["lamp", 0.28], ["tree", 0.2], ["hsign", 0.06], ["roadsign", 0.08]], pal: { skyTop: "#58a9e8", skyBot: "#ecd9c0", sun: "#ffdfa6", far: "#a9b8ca", mid: "#88aa76", midDark: "#6d8f60", grassTop: "#b9c2cb", grass: "#4b5661", soil: "#a0805c", soilDark: "#7a5f42", stone: "#664e34", tree: "#4a8a3a", treeDark: "#35682a", trunk: "#6d4a30" } },
+        { name: "Night Expressway", at: 1600, far: "city", tufts: 0, night: 1, decor: [["lamp", 0.42], ["roadsign", 0.1]], pal: { skyTop: "#0a1228", skyBot: "#2a2f5e", sun: "#eef2ff", far: "#20264a", mid: "#1b2d44", midDark: "#132233", grassTop: "#8b96a1", grass: "#383f4a", soil: "#3b3644", soilDark: "#292532", stone: "#201c28", tree: "#1e4b3b", treeDark: "#143428", trunk: "#2e2633" } },
+      ],
+    },
+    {
+      id: "forest", name: "Forest", seed: 5150, pay: 1.25, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.15, zones: ZONES.thicket, logs: true, height: forestH,
+      o2: [140, 195, 32], fires: [80, 120, 90], music: [-1, 96], lot: "#5a6655", station: "earth", town: "FOREST",
+      blurb: "Fallen trunks to bounce over and thick woods that hold you back.", mods: [["Logs", "hard"], ["Dense trees slow you", "hard"], ["Pills ×1.25", "good"]],
+      biomes: [
+        { name: "Old Woods", at: 0, far: "hills", decor: [["tree", 0.42], ["pine", 0.3], ["bush", 0.15]], pal: { skyTop: "#4d9fd8", skyBot: "#d4eddc", sun: "#fff3c4", far: "#7fae8c", mid: "#4f9a5a", midDark: "#37794a", grassTop: "#7ec94f", grass: "#4d9c3b", soil: "#7d5a3b", soilDark: "#5e432c", stone: "#4d3825", tree: "#3f8a35", treeDark: "#2c6a28", trunk: "#5e4128" } },
+        { name: "Deep Forest", at: 800, far: "hills", decor: [["pine", 0.55], ["tree", 0.3], ["bush", 0.1]], pal: { skyTop: "#3f7f9f", skyBot: "#a8cdb4", sun: "#fff0c0", far: "#527a66", mid: "#346b49", midDark: "#245238", grassTop: "#5da33e", grass: "#3a7c2f", soil: "#5e4530", soilDark: "#443222", stone: "#352719", tree: "#2c6a35", treeDark: "#1f4e27", trunk: "#463020" } },
+      ],
+    },
+    {
+      id: "mountain", name: "Mountain", seed: 8211, pay: 1.5, gravity: -12, friction: 1.05, iceFriction: 0.3, maxSlope: 1.25,
+      o2: [170, 185, 30], fires: [100, 150, 100], music: [1, 106], lot: "#6d6d66", station: "earth", town: "MOUNTAIN", height: mountainH,
+      blurb: "Long, relentless climbs and hairy drops all the way to the summit.", mods: [["Steepest hills", "hard"], ["Big drops", "hard"], ["Pills ×1.5", "good"]],
+      biomes: [
+        { name: "Foothills", at: 0, far: "peaks", caps: 1, decor: [["pine", 0.32], ["tree", 0.15], ["rock", 0.18]], pal: { skyTop: "#4d9ae0", skyBot: "#e2eef2", sun: "#fff3c4", far: "#8ea3bb", mid: "#6ea568", midDark: "#548a53", grassTop: "#9dcc62", grass: "#6da646", soil: "#8d7355", soilDark: "#6c563f", stone: "#574432", tree: "#3f7d3a", treeDark: "#2d6030", trunk: "#604630" } },
+        { name: "Alpine Meadow", at: 500, far: "peaks", caps: 1, snow: 0.5, decor: [["pine", 0.4], ["flowers", 0.16], ["rock", 0.18]], pal: { skyTop: "#4a91d8", skyBot: "#dbe8f0", sun: "#fff6d0", far: "#8496b4", mid: "#7fa86f", midDark: "#5e8a56", grassTop: "#b4d670", grass: "#82b04d", soil: "#8a7a6a", soilDark: "#6a5d50", stone: "#55493e", tree: "#37703a", treeDark: "#285530", trunk: "#5a4332" } },
+        { name: "Summit Ridge", at: 1400, far: "peaks", caps: 1, snow: 1, tufts: 0, trees: 0, flakes: 0.3, decor: [["rock", 0.4], ["pine", 0.14]], pal: { skyTop: "#3f7fc8", skyBot: "#dfeaf4", sun: "#ffffff", far: "#8d9fbb", mid: "#b8c4d0", midDark: "#8e9dab", grassTop: "#f4f8fb", grass: "#d4dfe8", soil: "#7f7a80", soilDark: "#5e595f", stone: "#4a464c", tree: "#2f6650", treeDark: "#20493a", trunk: "#51402f" } },
+      ],
+    },
+    {
+      id: "seasons", name: "Four Seasons", seed: 2468, pay: 1.25, gravity: -12, friction: 1.0, iceFriction: 0.45, maxSlope: 1.15,
+      o2: [190, 200, 32], fires: [90, 130, 90], music: [4, 110], lot: "#5f6a72", station: "earth", town: "VALLEY", height: seasonsH,
+      blurb: "Drive through spring, summer and autumn into a snowy winter.", mods: [["All 4 seasons", ""], ["Icy winter", "hard"], ["Pills ×1.25", "good"]],
+      biomes: [
+        { name: "Spring", at: 0, far: "hills", decor: [["tree", 0.34], ["flowers", 0.28], ["bush", 0.14]], pal: { skyTop: "#62b4f0", skyBot: "#e6f6ff", sun: "#fff6d0", far: "#b4d4e0", mid: "#8fd07f", midDark: "#6fb46a", grassTop: "#a8e870", grass: "#7ccc52", soil: "#b58a58", soilDark: "#93693f", stone: "#7d5a38", tree: "#f29cc0", treeDark: "#d877a2", trunk: "#7a5233" } },
+        { name: "Summer", at: 500, far: "hills", decor: [["tree", 0.38], ["bush", 0.2], ["hay", 0.12], ["flowers", 0.06]], pal: { skyTop: "#2f97ee", skyBot: "#cfeeff", sun: "#fff0b0", far: "#94bfd8", mid: "#62b652", midDark: "#4b9a41", grassTop: "#94e04e", grass: "#5cb636", soil: "#ba864e", soilDark: "#976838", stone: "#7d5734", tree: "#3f9a30", treeDark: "#2c7a24", trunk: "#7e5634" } },
+        { name: "Autumn", at: 1000, far: "hills", sunLow: 0.6, decor: [["tree", 0.42], ["hay", 0.16], ["fence", 0.12], ["bush", 0.1]], pal: { skyTop: "#6b9fd0", skyBot: "#f8dcb0", sun: "#ffd08a", far: "#b09a88", mid: "#c48c44", midDark: "#a56f30", grassTop: "#e0a848", grass: "#c07e2e", soil: "#9a6d43", soilDark: "#775232", stone: "#624226", tree: "#e2762a", treeDark: "#b85218", trunk: "#5e4128" } },
+        { name: "Winter", at: 1500, far: "peaks", caps: 1, snow: 1, tufts: 0, flakes: 0.5, ice: 0.6, decor: [["pine", 0.42], ["snowman", 0.1], ["cabin", 0.05]], pal: { skyTop: "#8cb7dc", skyBot: "#eef5fb", sun: "#ffffff", far: "#b5c6dc", mid: "#dce8f2", midDark: "#7c9da0", grassTop: "#ffffff", grass: "#e4eef6", soil: "#8b8290", soilDark: "#655d6a", stone: "#4f4852", tree: "#2f6b55", treeDark: "#21503f", trunk: "#5a4436" } },
+      ],
+    },
+    {
+      id: "beach", name: "Beach", seed: 6060, pay: 1, gravity: -12, friction: 0.82, iceFriction: 0.3, maxSlope: 1.1,
+      o2: [220, 235, 40], fires: [130, 180, 110], music: [5, 112], lot: "#a79a84", station: "earth", town: "BEACH", height: beachH,
+      blurb: "Soft sand, palm trees and a sea view. An easy cruise with a little slip.", mods: [["Gentle", "good"], ["Soft sand", "hard"], ["Pills ×1", ""]],
+      biomes: [
+        { name: "Sunny Shore", at: 0, far: "ocean", tufts: 0, trees: 0, dust: 0.1, decor: [["palm", 0.26], ["umbrella", 0.18], ["lifeguard", 0.06], ["rock", 0.05]], pal: { skyTop: "#38a6f0", skyBot: "#c8f0ff", sun: "#fff3c4", far: "#2a9fd0", mid: "#f0dca4", midDark: "#d9c288", grassTop: "#fff1c4", grass: "#f5dfa2", soil: "#e8cb8c", soilDark: "#c9a968", stone: "#b0925a", tree: "#4ea644", treeDark: "#37852f", trunk: "#8a6a45" } },
+        { name: "Sunset Bay", at: 800, far: "ocean", tufts: 0, trees: 0, sunLow: 1, decor: [["palm", 0.3], ["umbrella", 0.14], ["rock", 0.08]], pal: { skyTop: "#6a60c0", skyBot: "#ffb080", sun: "#ffcf8a", far: "#c96a70", mid: "#e0b88a", midDark: "#c49c70", grassTop: "#f5cf9c", grass: "#e2b47c", soil: "#c9985f", soilDark: "#a37a48", stone: "#8a653c", tree: "#3f7d40", treeDark: "#2d5f30", trunk: "#6a4a30" } },
+      ],
+    },
+    {
+      id: "puddles", name: "Puddle Dunes", seed: 7712, pay: 1.5, gravity: -12, friction: 0.88, iceFriction: 0.3, maxSlope: 1.15, zones: ZONES.water,
+      o2: [125, 185, 30], fires: null, music: [-4, 98], lot: "#8a7a66", station: "earth", town: "OASIS", height: puddlesH,
+      blurb: "Sand with deep water puddles that bog you down. The Rescue Boat doesn't care.", mods: [["Water slows you", "hard"], ["Boat is immune", "good"], ["Pills ×1.5", "good"]],
+      biomes: [
+        { name: "Wet Sands", at: 0, far: "dunes", tufts: 0, trees: 0, decor: [["reeds", 0.2], ["palm", 0.1], ["rock", 0.12], ["cactus", 0.1]], pal: { skyTop: "#4ca4e8", skyBot: "#fff0d0", sun: "#fff1c0", far: "#e6c896", mid: "#ddb478", midDark: "#c49c60", grassTop: "#f7e0a8", grass: "#e8c683", soil: "#d2a266", soilDark: "#ab7d4a", stone: "#90683c", tree: "#5d9a4a", treeDark: "#3f7a35", trunk: "#8a6a45" } },
+        { name: "Oasis Flats", at: 800, far: "dunes", tufts: 0, trees: 0, sunLow: 0.5, decor: [["palm", 0.26], ["reeds", 0.24], ["rock", 0.08]], pal: { skyTop: "#5a94d8", skyBot: "#ffdcb0", sun: "#ffe0a0", far: "#d6ae80", mid: "#cfa46c", midDark: "#b08858", grassTop: "#eecd96", grass: "#d8ad72", soil: "#bf8e56", soilDark: "#98703f", stone: "#7d5b34", tree: "#4f9a48", treeDark: "#357a34", trunk: "#7a5a38" } },
       ],
     },
     {
@@ -861,6 +1133,25 @@
         { name: "Starlit Desert", at: 2300, far: "dunes", tufts: 0, trees: 0, night: 1, decor: [["cactus", 0.2], ["rock", 0.15], ["tumble", 0.05]], pal: {
           skyTop: "#0b1230", skyBot: "#36335f", sun: "#eef2ff", far: "#2a2a4c", mid: "#3a3552", midDark: "#2a2640",
           grassTop: "#b3a383", grass: "#87775d", soil: "#5d4c45", soilDark: "#3f3432", stone: "#2b2324", tree: "#2f5a3a", treeDark: "#203f29", trunk: "#3a2f2a" } },
+      ],
+    },
+    {
+      id: "mudflats", name: "Mud Bog", seed: 9933, pay: 1.75, gravity: -12, friction: 0.72, iceFriction: 0.3, maxSlope: 1.1, zones: ZONES.mud,
+      o2: [125, 180, 28], fires: null, music: [-6, 92], lot: "#5d5244", station: "earth", town: "SWAMP", height: mudH,
+      blurb: "Slippery ground and long sticky mud pits that eat your speed.", mods: [["Mud slows you", "hard"], ["Slippery", "hard"], ["Pills ×1.75", "good"]],
+      biomes: [
+        { name: "Bog Road", at: 0, far: "hills", tufts: 0, decor: [["deadtree", 0.22], ["fence", 0.12], ["hay", 0.08], ["rock", 0.1]], pal: { skyTop: "#7d9fb8", skyBot: "#d9d6b8", sun: "#fff0c0", far: "#8c9a84", mid: "#6f7d52", midDark: "#566340", grassTop: "#8a7a4a", grass: "#6b5a34", soil: "#5a4228", soilDark: "#40301e", stone: "#322618", tree: "#51703a", treeDark: "#3b542c", trunk: "#4a3522" } },
+        { name: "Swamp", at: 800, far: "hills", tufts: 0, decor: [["deadtree", 0.3], ["reeds", 0.26], ["rock", 0.06]], pal: { skyTop: "#5f7f88", skyBot: "#b8c4a0", sun: "#f0e8b0", far: "#6c7f70", mid: "#54683f", midDark: "#3f5030", grassTop: "#6e6a3c", grass: "#54502c", soil: "#463420", soilDark: "#2f2316", stone: "#251c12", tree: "#3f5e30", treeDark: "#2c4624", trunk: "#3b2a1c" } },
+      ],
+    },
+    {
+      id: "cave", name: "Crystal Cave", seed: 1357, pay: 1.75, gravity: -12, friction: 1.0, iceFriction: 0.3, maxSlope: 1.2, noSun: true,
+      o2: [175, 190, 30], fires: null, music: [-7, 88], lot: "#3b3a42", station: "earth", town: "CAVERN", height: caveH,
+      blurb: "Pitch dark underground, lit by your headlights and glowing crystals.", mods: [["Dark", "hard"], ["Rocky", "hard"], ["Pills ×1.75", "good"]],
+      biomes: [
+        { name: "Limestone Cavern", at: 0, far: "cave", night: 1, cavern: 1, clouds: 0, tufts: 0, trees: 0, decor: [["stalagmite", 0.3], ["mushroom", 0.16], ["crystal", 0.1], ["rock", 0.14]], pal: { skyTop: "#0f0d12", skyBot: "#262029", sun: "#eef2ff", far: "#352e38", mid: "#3f3640", midDark: "#2d262e", grassTop: "#857a78", grass: "#5e5450", soil: "#4a403c", soilDark: "#2e2826", stone: "#201c1a", tree: "#7d8290", treeDark: "#5f6470", trunk: "#5f6470" } },
+        { name: "Crystal Hollow", at: 600, far: "cave", night: 1, cavern: 1, clouds: 0, tufts: 0, trees: 0, decor: [["crystal", 0.36], ["stalagmite", 0.2], ["mushroom", 0.1]], pal: { skyTop: "#0a0a1c", skyBot: "#1c1c3e", sun: "#eef2ff", far: "#2a2850", mid: "#332f5e", midDark: "#242147", grassTop: "#8c84c0", grass: "#5c5498", soil: "#3f3a68", soilDark: "#26234a", stone: "#1a1838", tree: "#7d8290", treeDark: "#5f6470", trunk: "#5f6470" } },
+        { name: "Magma Depths", at: 1500, far: "cave", night: 1, cavern: 1, clouds: 0, tufts: 0, trees: 0, lava: 0.7, embers: 0.5, decor: [["lavarock", 0.3], ["stalagmite", 0.22], ["vent", 0.08]], pal: { skyTop: "#120808", skyBot: "#3a1410", sun: "#ffe0c0", far: "#3c1f1a", mid: "#44261f", midDark: "#2f1a15", grassTop: "#6d5048", grass: "#46322c", soil: "#30201c", soilDark: "#180f0d", stone: "#ff6a1a", tree: "#2a1c18", treeDark: "#1c1210", trunk: "#1c1210" } },
       ],
     },
     {
@@ -902,6 +1193,23 @@
       ],
     },
     {
+      id: "arena", name: "Stunt Arena", seed: 4242, pay: 2, gravity: -12, friction: 1.05, iceFriction: 0.3, maxSlope: 1.25,
+      o2: [180, 195, 30], fires: [70, 90, 60], music: [6, 124], lot: "#4a4038", station: "earth", town: "ARENA", height: arenaH,
+      blurb: "Packed stands and giant dirt ramps. Land your flips for the crowd.", mods: [["Huge jumps", "good"], ["Big crashes", "hard"], ["Pills ×2", "good"]],
+      biomes: [
+        { name: "Main Event", at: 0, far: "stands", night: 0.75, clouds: 0, tufts: 0, trees: 0, decor: [["tire", 0.22], ["hay", 0.12], ["banner", 0.14]], pal: { skyTop: "#141a2c", skyBot: "#3a4466", sun: "#eef2ff", far: "#2c3454", mid: "#3c3a44", midDark: "#2c2a32", grassTop: "#b08858", grass: "#8e6a42", soil: "#7a5a3a", soilDark: "#5a4228", stone: "#463220", tree: "#4f6a3a", treeDark: "#3a5030", trunk: "#4a3522" } },
+      ],
+    },
+    {
+      id: "coaster", name: "Roller Coaster", seed: 1313, pay: 2.25, gravity: -12, friction: 1.1, iceFriction: 0.3, maxSlope: 1.35, surface: "rails",
+      o2: [170, 185, 28], fires: null, music: [7, 128], lot: "#5a5f6c", station: "earth", town: "COASTER", height: coasterH,
+      blurb: "Giant steep drops and climbs along a steel track above the park.", mods: [["Huge drops", "hard"], ["Massive air", "good"], ["Pills ×2.25", "good"]],
+      biomes: [
+        { name: "The Midway", at: 0, far: "park", tufts: 0, trees: 0, decor: [["balloon", 0.14], ["banner", 0.1]], pal: { skyTop: "#4ca8f2", skyBot: "#e4f4ff", sun: "#fff3c4", far: "#a9b6d6", mid: "#8cc4a0", midDark: "#6ea886", grassTop: "#ff5a5a", grass: "#c8323a", soil: "#8d9cb4", soilDark: "#6c7a92", stone: "#5a6780", tree: "#4f9e3f", treeDark: "#3a7d30", trunk: "#7a5233" } },
+        { name: "Night Ride", at: 1200, far: "park", night: 1, tufts: 0, trees: 0, decor: [["balloon", 0.12], ["lamp", 0.1]], pal: { skyTop: "#0c1030", skyBot: "#3a2f6e", sun: "#eef2ff", far: "#262a56", mid: "#2a3a58", midDark: "#1c2a42", grassTop: "#ff6a6a", grass: "#b02a34", soil: "#39405e", soilDark: "#262b44", stone: "#1c2036", tree: "#1e4b3b", treeDark: "#143428", trunk: "#2e2633" } },
+      ],
+    },
+    {
       id: "moon", name: "Moon Base", seed: 1969, pay: 2.5, gravity: -4.6, friction: 1.6, iceFriction: 0.3, maxSlope: 1.2,
       o2: [165, 180, 28], fires: null, beam: true, music: [5, 92], lot: "#5a5f6c", station: "moon", town: "MOON", height: moonH,
       blurb: "Low gravity, craters and enormous air time.", mods: [["Low gravity", "good"], ["Supply beams", "good"], ["Pills ×2.5", "good"]],
@@ -919,7 +1227,7 @@
     },
   ];
   const mapById = (id) => MAPS.find((m) => m.id === id) || MAPS[0];
-  const SCALARS = { night: 0, snow: 0, sunLow: 0, clouds: 1, space: 0, aurora: 0, lava: 0, ice: 0, tufts: 1, trees: 1, flakes: 0, embers: 0, dust: 0, caps: 0 };
+  const SCALARS = { cavern: 0, night: 0, snow: 0, sunLow: 0, clouds: 1, space: 0, aurora: 0, lava: 0, ice: 0, tufts: 1, trees: 1, flakes: 0, embers: 0, dust: 0, caps: 0 };
   const PAL_KEYS = Object.keys(MAPS[0].biomes[0].pal);
   for (const m of MAPS) {
     for (const b of m.biomes) {
@@ -947,7 +1255,7 @@
     stats: { dist: 0, flips: 0, fires: 0, air: 0, speed: 0, calls: 0, ...(loaded.stats || {}) },
     calls: { list: [], done: 0, seed: 1, skip: true, ...(loaded.calls || {}) },
   };
-  for (const v of VEHICLES) save.ups[v.id] = { engine: 0, susp: 0, tires: 0, tank: 0, ...((loaded.ups || {})[v.id] || {}) };
+  for (const v of VEHICLES) save.ups[v.id] = { engine: 0, susp: 0, tires: 0, ...((loaded.ups || {})[v.id] || {}) };
   for (const m of MAPS) save.best[m.id] = (loaded.best || {})[m.id] || 0;
   delete save.owned;                     // older saves tracked unlocks; every vehicle and map is open now
   save.car = vehicleById(save.car).id;
@@ -1066,7 +1374,7 @@
     const ws = biomeWeights(gx((i0 + i1) / 2));
     let ice = 0; for (let j = 0; j < ws.length; j++) ice += MAP.biomes[j].ice * ws[j];
     const b = world.createBody({ type: "static" });
-    b.createFixture(shape, { friction: lerp(MAP.friction, MAP.iceFriction, ice), userData: "ground" });
+    b.createFixture(shape, { friction: VEH.iceProof ? MAP.friction : lerp(MAP.friction, MAP.iceFriction, ice), userData: "ground" });
     return b;
   }
   function syncChunks(x) {
@@ -1088,7 +1396,7 @@
     let inertia = ch.getInertia();
     const wheels = v.wheels.map((lx) => {
       const b = world.createBody({ type: "dynamic", position: Vec2(x + lx, y + v.wheelY), angularDamping: 0.3 });
-      b.createFixture(Circle(v.wheelR), { density: 1.2, friction: st.grip, restitution: 0.05, userData: "wheel" });
+      b.createFixture(Circle(v.wheelR), { density: 1.2, friction: st.grip, restitution: 0.05, userData: "wheel", filterGroupIndex: -1 });
       const j = world.createJoint(WheelJoint(jdef, ch, b, b.getPosition(), Vec2(0, 1)));
       inertia += b.getMass() * lx * lx;
       return { b, j, lx, touch: true };
@@ -1147,7 +1455,8 @@
   const STUCK_TIME = 4;      // s: how long you can sit tipped over or wedged before the run ends
   const OUT_TIME = 30;       // s: how long viewers have to refuel you once the tank is empty
   const JAIL_TIME = 15, JAIL_MAX = 60;   // s: one "put me in jail" gift, and the most they can stack up
-  const BOOST_DIST = 5000, BOOST_SPEED = 750;   // m and m/s: one air medevac flight
+  const SEND_SPEED = 750, SEND_MIN_X = 80;     // helicopter m/s, and the lowest point on the course it flies back to
+  const RESET_TIME = 50;     // s viewers have to press Save after a Reset
   const BOOM_TIME = 3;       // s from the explosion to the next vehicle
 
   function newRun() {
@@ -1155,8 +1464,8 @@
     for (const o of o2s) { o.got = false; o.gotAt = 0; }
     for (const f of fires) { f.hp = 1; f.out = false; f.outAt = 0; }
     return {
-      pills: 0, bonus: 0, flips: 0, maxAir: 0, dist: 0, refills: 0, fires: 0, maxKmh: 0, nitroTime: 0,
-      o2: car.stats.tank, tank: car.stats.tank, empty: 0, stuck: 0, tipped: false, reserve: VEH.id === "ambulance", reserveUsed: false, swaps: 0,
+      pills: 0, bonus: 0, flips: 0, maxAir: 0, dist: 0, farX: START_X, resetLeft: 0, sendQueue: [], refills: 0, fires: 0, maxKmh: 0, nitroTime: 0,
+      o2: car.stats.tank, tank: car.stats.tank, empty: 0, stuck: 0, tipped: false, reserve: !!VEH.reserve, reserveUsed: false, swaps: 0,
       ability: 1, abilityLock: false, boosting: false, spraying: false, sprayAcc: 0,
       jail: 0, jailAt: -10, cageOffAt: -10, jailNext: 0, heli: null, fuelPopup: null,
       biome: 0, cause: "", siren: false, sirenUntil: 0, nextMarker: 100,
@@ -1181,7 +1490,6 @@
     $("hud").hidden = false;
     $("touch").hidden = !coarse;
     setupDriveUi();
-    if (!coarse) { const h = $("keys-hint"); h.hidden = true; void h.offsetWidth; h.hidden = false; }
     showBanner(MAP.biomes[0].name, MAP.name);
     setVoices();
     sfx.start();
@@ -1200,17 +1508,11 @@
     clearInput();
     $("hud").hidden = true;
     $("touch").hidden = true;
-    $("keys-hint").hidden = true;
     renderGarage();
     showScreen("garage");
     updateMusicLevel(0.6);
   }
 
-  const DEBRIS = {
-    ambulance: [[226, 59, 59], [255, 255, 255], [160, 210, 240]],
-    police: [[28, 37, 48], [255, 255, 255], [160, 210, 240]],
-    fire: [[216, 49, 47], [255, 255, 255], [255, 197, 49]],
-  };
   function crash(cause) {
     if (state !== "drive") return;
     state = "crash";
@@ -1220,7 +1522,7 @@
     flash = 1;
     $("banner").classList.remove("show");
     sfx.crash();
-    const p = car.chassis.getPosition(), cols = DEBRIS[VEH.id];
+    const p = car.chassis.getPosition(), cols = VEH.debris;
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 6;
       particles.push({
@@ -1244,7 +1546,7 @@
     "Never land on the roof above the driver. That ends the run, even at low speed.",
     "Tipped onto your side or tail? Tilt quickly to roll back before the countdown runs out.",
     "Ease off the gas on the way up steep hills, or you'll flip backwards.",
-    "Refills get farther apart. A bigger tank buys you time.",
+    "Refills get farther apart, so don't waste fuel sitting still.",
     "Better tires help you climb steep slopes, and they matter most on ice.",
     "Backflips and frontflips earn bonus pills when you land them.",
     "Suspension upgrades soften hard landings.",
@@ -1265,7 +1567,7 @@
     save.pills += earned;
     save.runs += 1;
     const s = save.stats;
-    s.dist += dist; s.flips += run.flips; s.fires += run.fires;
+    s.dist += Math.max(0, dist); s.flips += run.flips; s.fires += run.fires;
     s.air = Math.max(s.air, run.maxAir); s.speed = Math.max(s.speed, Math.round(run.maxKmh));
     checkCalls(true);
     save.calls.skip = true;
@@ -1312,7 +1614,6 @@
     countUp($("r-total"), earned + callPills);
     $("hud").hidden = true;
     $("touch").hidden = true;
-    $("keys-hint").hidden = true;
     showScreen("results");
     sfx.report(isBest);
     updateMusicLevel(0.6);
@@ -1404,7 +1705,7 @@
     }
     ch.applyLinearImpulse(Vec2(-m * 2, m * kick), ch.getWorldCenter(), true);
     ch.applyAngularImpulse(ch.getInertia() * (Math.random() < 0.5 ? -1 : 1) * (3 + Math.random() * 2), true);
-    const cols = DEBRIS[VEH.id];
+    const cols = VEH.debris;
     for (let i = 0; i < 30; i++) {
       const a = Math.random() * Math.PI * 2, sp = 2 + Math.random() * 7;
       particles.push({ kind: "flame", x: p.x + (Math.random() - 0.5) * 2.4, y: p.y + Math.random() * 1.4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 2, life: 0, max: 0.5 + Math.random() * 0.5, r: 0.3 + Math.random() * 0.5, grow: 0.7, color: i % 3 ? [255, 150, 40] : [255, 225, 110], a: 0.95, g: -0.1 });
@@ -1421,30 +1722,40 @@
     addPopup("GO!", 0, "#ffffff");
   }
 
-  // Air medevac: a helicopter carries you 5,000 m down the course, then sets you back down on the road
-  function startHelicopter() {
-    if (state !== "drive") return;
-    if (run.heli) { run.heli.toX += BOOST_DIST; return; }
+  // Send up / send down: the medical helicopter flies the run that many metres forward or back along the
+  // course, and the score moves with it. Sending down can take the score below zero.
+  function send(meters) {
+    if (state !== "drive" || !meters) return;
+    const h = run.heli;
+    if (h && h.dir > 0 && meters > 0) { h.toX += meters; return; }     // another send up just stretches the flight
+    if (h) { run.sendQueue.push(meters); return; }
     const ch = car.chassis, p = ch.getPosition();
     run.jail = 0;
     run.boosting = run.spraying = false;
     run.stuck = 0;
     air.on = false;
-    run.heli = { x: p.x, y: p.y + 1.5, v: Math.max(0, ch.getLinearVelocity().x), toX: p.x + BOOST_DIST, a: 0 };
     smokePuff(p.x, p.y);
-    addPopup(`Air medevac ${fmt(BOOST_DIST)} m`, 0, "#ffc531");
+    setFlight(p.x, p.y + 1.5, Math.max(0, ch.getLinearVelocity().x), meters);
+  }
+  function setFlight(x, y, v, meters) {
+    const dir = Math.sign(meters), dist = Math.abs(meters);
+    // The course only runs one way from the start, so a long trip back begins further up with a quick fade
+    if (dir < 0 && x - dist < SEND_MIN_X) { captureFade(); x = SEND_MIN_X + dist; y = groundY(x) + 6; }
+    run.heli = { x, y, v: dir > 0 ? v : 0, toX: x + meters, dir, a: run.heli ? run.heli.a : 0 };
+    addPopup(`${dir > 0 ? "+" : "−"}${fmt(dist)} m`, 0, dir > 0 ? "#7df0b0" : "#ff8a8a");
     sfx.banner();
   }
   function stepHelicopter(dt) {
-    const h = run.heli, left = h.toX - h.x;
-    h.v = Math.min(h.v + 400 * dt, BOOST_SPEED, Math.max(10, left * 2.4));
-    h.x += h.v * dt;
+    const h = run.heli, left = Math.abs(h.toX - h.x);
+    h.v = Math.min(h.v + 400 * dt, SEND_SPEED, Math.max(10, left * 2.4));
+    const dx = Math.min(h.v * dt, left);
+    h.x += h.dir * dx;
+    run.dist += h.dir * dx;
     // Fly just over whatever hill is coming up
-    const look = h.v * 0.2, top = Math.max(groundY(h.x), groundY(h.x + look * 0.5), groundY(h.x + look));
+    const look = h.dir * h.v * 0.2, top = Math.max(groundY(h.x), groundY(h.x + look * 0.5), groundY(h.x + look));
     h.y += (top + 5 - h.y) * Math.min(1, dt * 3);
     h.a += (-0.2 * Math.min(1, h.v / 150) - h.a) * Math.min(1, dt * 4);
-    run.dist = Math.max(run.dist, h.x - START_X);
-    if (h.x >= h.toX - 0.5) landHelicopter();
+    if (left <= dx) landHelicopter();
   }
   // The nearest place ahead that's gentle under a whole vehicle, so nobody gets set down on a crater rim
   function safeSpot(x) {
@@ -1456,9 +1767,12 @@
     return x;
   }
   function landHelicopter() {
-    const h = run.heli, x = safeSpot(h.x), vx = Math.min(h.v, 8);
+    const h = run.heli, next = run.sendQueue.shift();
+    if (next) { setFlight(h.x, h.y, h.v, next); return; }
+    const x = safeSpot(h.x), vx = h.dir > 0 ? Math.min(h.v, 8) : 0;
     run.heli = null;
     newWorld(x);
+    run.farX = x;
     for (const b of [car.chassis, ...car.wheels.map((w) => w.b)]) b.setLinearVelocity(Vec2(vx, 0));
     for (const w of car.wheels) w.b.setAngularVelocity(-vx / VEH.wheelR);
     run.lastV = { x: vx, y: 0 };
@@ -1474,6 +1788,47 @@
     }
   }
 
+  // Reset: a big countdown starts. Save stops it; if it runs out, the run starts over at 0.
+  function startReset() { if (inRun() && run.resetLeft <= 0) { run.resetLeft = RESET_TIME; sfx.alarm(); } }
+  function saveRun() {
+    if (!inRun() || run.resetLeft <= 0) return;
+    run.resetLeft = 0;
+    addPopup("Saved!", 0, "#7df0b0");
+    sfx.release();
+  }
+  function stepResetTimer(dt) {
+    const was = Math.ceil(run.resetLeft);
+    run.resetLeft -= dt;
+    const now = Math.ceil(run.resetLeft);
+    if (run.resetLeft <= 0) {
+      settleRun();
+      startRun();
+      iris = { open: true, t0: realNow };
+      addPopup("Reset!", 0, "#ffffff");
+      return true;
+    }
+    if (now !== was && now <= 10) sfx.alarm();
+    return false;
+  }
+  // Reset Everything: pills, upgrades, best distances, stats and calls are wiped, and the vehicle blows up
+  function resetEverything() {
+    if (state === "paused") resume();
+    if (state === "drive" && run.heli) {
+      const x = safeSpot(run.heli.x);
+      run.heli = null; run.sendQueue = [];
+      newWorld(x);
+    }
+    if (state === "drive") kaboom();
+    save.pills = 0; save.runs = 0;
+    for (const v of VEHICLES) save.ups[v.id] = { engine: 0, susp: 0, tires: 0 };
+    for (const m of MAPS) save.best[m.id] = 0;
+    save.stats = { dist: 0, flips: 0, fires: 0, air: 0, speed: 0, calls: 0 };
+    save.calls = { list: [], done: 0, seed: 1, skip: true };
+    refreshCalls();
+    if (state === "garage" || state === "results") { newWorld(); renderGarage(); }
+    persist();
+  }
+
   // Timed events that run once per frame or test tick
   function timers() {
     processSwaps();
@@ -1484,7 +1839,7 @@
 
   // ---------- Live swaps (TikTok LIVE and other stream tools) ----------
   // Viewers can change the vehicle or the map in the middle of a run. Stream tools trigger it with keys
-  // (1–3 vehicle, 4–8 map, V / B next) or from a script through window.HillClimbRescue or postMessage.
+  // (C random vehicle, M random map) or from a script through window.HillClimbRescue or postMessage.
   // The run carries on from the same distance: same pills, same score, same fuel level.
   const SWAP_COOLDOWN = 1.2;   // s between swaps, so a burst of gifts doesn't strobe the screen
   let pendingSwap = null, lastSwapAt = -10;
@@ -1501,9 +1856,9 @@
     }
     if (state === "drive" || state === "paused") pendingSwap = want;
   }
-  const cycle = (list, id) => list[(list.findIndex((o) => o.id === id) + 1) % list.length].id;
-  const nextVehicle = () => requestSwap(cycle(VEHICLES, (pendingSwap || sel).car), null);
-  const nextMap = () => requestSwap(null, cycle(MAPS, (pendingSwap || sel).map));
+  const pickOther = (list, id) => { const o = list.filter((x) => x.id !== id); return o[Math.floor(Math.random() * o.length)].id; };
+  const randomVehicle = () => requestSwap(pickOther(VEHICLES, (pendingSwap || sel).car), null);
+  const randomMap = () => requestSwap(null, pickOther(MAPS, (pendingSwap || sel).map));
   function processSwaps() {
     if (!pendingSwap) return;
     if (state !== "drive" && state !== "paused") { pendingSwap = null; return; }
@@ -1523,11 +1878,12 @@
     if (mapChanged) { MAP = mapById(sw.map); resetCourse(); genPickups(x + 120); }
     const spot = safeSpot(x);
     newWorld(spot);
+    run.farX = spot;
     // Keep rolling at the same speed in the new vehicle, on the new ground
     for (const b of [car.chassis, ...car.wheels.map((w) => w.b)]) b.setLinearVelocity(Vec2(vx, 0));
     for (const w of car.wheels) w.b.setAngularVelocity(-vx / VEH.wheelR);
     run.tank = car.stats.tank; run.o2 = run.tank * frac;
-    run.reserve = VEH.id === "ambulance" && !run.reserveUsed;
+    run.reserve = !!VEH.reserve && !run.reserveUsed;
     run.ability = 1; run.abilityLock = false; run.boosting = false; run.spraying = false;
     run.stuck = 0; run.tipped = false; run.lastV = { x: vx, y: 0 };
     run.biome = dominantBiome(x);
@@ -1543,21 +1899,21 @@
     removeFuel: (pct = 2) => changeFuel(-(Math.abs(+pct) || 2)),
     jail: (sec = JAIL_TIME) => putInJail(Math.max(1, +sec) || JAIL_TIME),
     kaboom,
-    helicopter: startHelicopter,
+    sendUp: (m = 5000) => send(Math.abs(+m) || 5000),
+    sendDown: (m = 5000) => send(-(Math.abs(+m) || 5000)),
+    reset: startReset, save: saveRun, resetEverything,
+    randomVehicle, randomMap,
     vehicles: VEHICLES.map((v) => v.id), maps: MAPS.map((m) => m.id),
     vehicle: (id) => { if (VEHICLES.some((v) => v.id === id)) requestSwap(id, null); },
     map: (id) => { if (MAPS.some((m) => m.id === id)) requestSwap(null, id); },
-    nextVehicle, nextMap,
   };
   window.addEventListener("message", (e) => {
     const d = e.data;
     if (!d || d.type !== "hill-climb-rescue") return;
     if (d.vehicle) window.HillClimbRescue.vehicle(d.vehicle);
     if (d.map) window.HillClimbRescue.map(d.map);
-    if (d.next === "vehicle") nextVehicle();
-    if (d.next === "map") nextMap();
-    const act = window.HillClimbRescue[d.action];
-    if (["addFuel", "removeFuel", "jail", "kaboom", "helicopter"].includes(d.action)) act(d.amount);
+    const acts = ["addFuel", "removeFuel", "jail", "kaboom", "sendUp", "sendDown", "reset", "save", "resetEverything", "randomVehicle", "randomMap"];
+    if (acts.includes(d.action)) window.HillClimbRescue[d.action](d.amount);
   });
 
   // ---------- Dispatch calls (missions) ----------
@@ -1612,7 +1968,7 @@
       case "pills": return run.pills + run.bonus;
       case "refills": return run.refills;
       case "speed": return run.maxKmh;
-      case "total": return c.prog + run.dist;
+      case "total": return c.prog + Math.max(0, run.dist);
       case "fires": return run.fires;
       case "nitro": return run.nitroTime;
     }
@@ -1691,7 +2047,7 @@
     else if (v.x < target && pitch < 0.55) c.gas = true;
 
     // Specials: nitro only to rescue a stalling climb; water whenever a fire is in range
-    if (VEH.ability === "nitro") c.ability = here > 0.3 && v.x < 5 && pitch < 0.3;
+    if (VEH.ability === "nitro" || VEH.ability === "thrust") c.ability = here > 0.3 && v.x < 3 && pitch < 0.3;
     else if (VEH.ability === "water") c.ability = fires.some((f) => !f.out && f.x - p.x > 1 && f.x - p.x < 12);
     return c;
   }
@@ -1699,6 +2055,7 @@
   // ---------- Simulation step ----------
   function gameStep(dt) {
     simNow += dt;
+    if (run && state === "drive" && run.resetLeft > 0 && stepResetTimer(dt)) return;
     if (run && run.heli) { stepHelicopter(dt); updateParticles(dt); return; }
     chooseControls();
     const ch = car.chassis;
@@ -1711,18 +2068,20 @@
     const hasO2 = run && run.o2 > 0;
 
     // Abilities drain a charge that refills over time. Emptying it locks the ability until you let go.
-    let boost = false, spray = false;
+    let boost = false, spray = false, thrust = false;
     if (driving && !jailed && VEH.ability) {
       if (!ctl.ability) run.abilityLock = false;
       const want = ctl.ability && !run.abilityLock && run.ability > 0 && (VEH.ability === "water" || hasO2);
-      if (VEH.ability === "nitro") boost = want; else spray = want;
+      if (VEH.ability === "nitro") boost = want;
+      else if (VEH.ability === "water") spray = want;
+      else thrust = want;
       if (want) {
-        run.ability = Math.max(0, run.ability - dt / (boost ? 3.2 : 4));
+        run.ability = Math.max(0, run.ability - dt / (boost ? 3.2 : thrust ? 2.6 : 4));
         if (run.ability <= 0) run.abilityLock = true;
         if (boost) run.nitroTime += dt;
-      } else run.ability = Math.min(1, run.ability + dt / (VEH.ability === "nitro" ? 9 : 10));
+      } else run.ability = Math.min(1, run.ability + dt / (VEH.ability === "water" ? 10 : 9));
     }
-    if (run && boost !== run.boosting) { run.boosting = boost; sfx.nitro(boost); }
+    if (run && (boost || thrust) !== run.boosting) { run.boosting = boost || thrust; sfx.nitro(run.boosting); }
     if (run) run.spraying = spray;
 
     // Motors
@@ -1751,6 +2110,27 @@
     if (boost) {
       const a = ch.getAngle(), f = st.mass * 7.5;
       ch.applyForceToCenter(Vec2(Math.cos(a) * f, Math.sin(a) * f), true);
+    }
+
+    // Water, mud and thick trees drag at any wheel inside them
+    const zones = MAP.zones;
+    if (zones && driving && !(VEH.zoneProof && VEH.zoneProof.includes(zones.kind))) {
+      for (const w of car.wheels) {
+        const wp = w.b.getPosition(), q = zoneAt(zones, wp.x);
+        if (!q || (zones.kind !== "thicket" && wp.y - VEH.wheelR > zoneLevel(q) + 0.05)) continue;
+        const wv = w.b.getLinearVelocity();
+        w.b.applyForceToCenter(Vec2((-wv.x * st.mass * zones.drag) / car.wheels.length, 0), true);
+        if (Math.abs(wv.x) > 1.2 && Math.random() < 0.18) {
+          const col = zones.kind === "water" ? [180, 225, 255] : zones.kind === "mud" ? [74, 50, 28] : [90, 150, 70];
+          particles.push({ kind: "spark", x: wp.x, y: wp.y - VEH.wheelR * 0.5, vx: -wv.x * 0.25 + (Math.random() - 0.5) * 2, vy: 1.5 + Math.random() * 2.5, life: 0, max: 0.55, r: 0.09 + Math.random() * 0.06, grow: -0.05, color: col, a: 0.9, g: 1.2 });
+        }
+      }
+    }
+
+    // Thrusters lift along the body, a bit stronger than gravity on any map
+    if (thrust) {
+      const a = ch.getAngle(), f = st.mass * -MAP.gravity * 1.5;
+      ch.applyForceToCenter(Vec2(-Math.sin(a) * f, Math.cos(a) * f), true);
     }
 
     // Tilt (arrow keys / round buttons)
@@ -1790,7 +2170,7 @@
 
     const p = ch.getPosition(), v = ch.getLinearVelocity();
     const spd = Math.hypot(v.x, v.y);
-    run.dist = Math.max(run.dist, p.x - START_X);
+    if (p.x > run.farX) { run.dist += p.x - run.farX; run.farX = p.x; }   // the score rises with new ground, from wherever it stands
     genPickups(p.x + 120);
 
     // Patient heart rate climbs with bumps and g-forces
@@ -1810,7 +2190,7 @@
     const slope = Math.atan2(groundY(p.x + 1) - groundY(p.x - 1), 2);
     run.tipped = Math.cos(ch.getAngle() - slope) < 0.35;
     if (jailed) run.stuck = 0;
-    else if ((run.tipped && spd < 1.5) || (spd < 0.25 && (!car.grounded || car.bodyTouch))) {
+    else if ((run.tipped && spd < 1.5) || (spd < 0.25 && (!car.grounded || (car.bodyTouch && run.o2 > 0)))) {
       run.stuck += dt;
       if (run.stuck > STUCK_TIME) { crash(run.tipped ? "flipped" : "stuck"); return; }
     } else run.stuck = 0;
@@ -1897,10 +2277,10 @@
         particles.push({ kind: "dust", x: wp.x - 0.25, y: gy + 0.05, vx: -1.2 - Math.random() * 1.8 + v.x * 0.2, vy: 0.8 + Math.random() * 1.4, life: 0, max: 0.6, r: 0.1 + Math.random() * 0.12, grow: 0.25, color: null, a: 0.55, g: 1 });
       }
     }
-    if (boost) {
+    if (boost || thrust) {
       const a = ch.getAngle(), e = ch.getWorldPoint(Vec2(VEH.exhaust[0], VEH.exhaust[1] + 0.05));
       for (let k = 0; k < 2; k++) {
-        const s = 4 + Math.random() * 3, aa = a + Math.PI + (Math.random() - 0.5) * 0.4;
+        const s = 4 + Math.random() * 3, aa = a + (thrust ? -Math.PI / 2 : Math.PI) + (Math.random() - 0.5) * 0.4;
         particles.push({ kind: "flame", x: e.x, y: e.y, vx: Math.cos(aa) * s + v.x * 0.6, vy: Math.sin(aa) * s + v.y * 0.6, life: 0, max: 0.28, r: 0.16, grow: -0.3, color: Math.random() < 0.5 ? [255, 160, 40] : [120, 190, 255], a: 0.9, g: 0 });
       }
     }
@@ -2036,6 +2416,7 @@
   }
 
   function drawCelestial(pal) {
+    if (pal.cavern > 0.5) return;       // no sky underground
     const s = Math.max(0.75, H / 760), night = clamp(pal.night, 0, 1), sunset = pal.sunLow, space = pal.space;
     // stars
     if (night > 0.02) {
@@ -2177,6 +2558,10 @@
       ctx.restore();
     }
     if (w("volcano") > 0.01) drawVolcano(base, off, s, col, w("volcano"), pal);
+    if (w("cave") > 0.01) drawCaveWall(base, off, s, col, w("cave"));
+    if (w("ocean") > 0.01) drawOcean(base, off, s, col, w("ocean"));
+    if (w("park") > 0.01) drawPark(base, off, s, col, w("park"));
+    if (w("stands") > 0.01) drawStands(base, off, s, col, w("stands"));
     if (w("dunes") > 0.01) {
       silhouette(base, off, s, (u) => 62 + 32 * Math.sin(u * 0.004 + 1) + 22 * Math.sin(u * 0.0105 + 2.5) + 6 * Math.sin(u * 0.031), col, w("dunes"));
       silhouette(base + 18 * s, off * 1.3, s, (u) => 40 + 22 * Math.sin(u * 0.0055 + 4) + 14 * Math.sin(u * 0.014), mixRgb(col, pal.skyBot, 0.25), w("dunes") * 0.9);
@@ -2220,6 +2605,75 @@
       const lg = ctx.createLinearGradient(0, base - 90 * s, 0, base + 60 * s);
       lg.addColorStop(0, "rgba(255,110,40,0)"); lg.addColorStop(1, `rgba(255,110,40,${0.4 * pal.lava})`);
       ctx.fillStyle = lg; ctx.fillRect(0, base - 90 * s, W, 150 * s + H);
+    }
+  }
+
+  // Rock wall with stalactites hanging from the top of the screen and pillars standing below
+  function drawCaveWall(base, off, s, col, a) {
+    ctx.fillStyle = rgba(col, a); ctx.fillRect(0, 0, W, H);
+    const dark = mixRgb(col, [0, 0, 0], 0.4), span = 62 * s;
+    ctx.fillStyle = rgba(dark, a);
+    const k0 = Math.floor(off / span) - 1, k1 = Math.ceil((off + W) / span) + 1;
+    for (let k = k0; k <= k1; k++) {
+      const x = k * span - off + hash(k, 151) * 30 * s, len = (40 + hash(k, 152) * 150) * s, wid = (14 + hash(k, 153) * 22) * s;
+      ctx.beginPath(); ctx.moveTo(x - wid, -2); ctx.lineTo(x + wid, -2); ctx.lineTo(x + wid * 0.1, len); ctx.closePath(); ctx.fill();
+      if (hash(k, 154) > 0.62) { const up = (50 + hash(k, 155) * 120) * s; ctx.beginPath(); ctx.moveTo(x - wid, base + 40 * s); ctx.lineTo(x + wid, base + 40 * s); ctx.lineTo(x, base + 40 * s - up); ctx.closePath(); ctx.fill(); }
+    }
+  }
+  function drawOcean(base, off, s, col, a) {
+    const y = base - 34 * s;
+    ctx.fillStyle = rgba(col, a); ctx.fillRect(0, y, W, H);
+    ctx.strokeStyle = `rgba(255,255,255,${0.4 * a})`; ctx.lineWidth = 1.6 * s; ctx.beginPath();
+    for (let r = 0; r < 5; r++) {
+      const yy = y + (10 + r * 14) * s, span = 90 * s, shift = (off * (0.4 + r * 0.15) + realNow * (6 + r * 3) * s) % span;
+      for (let x = -span - shift; x < W + span; x += span) { ctx.moveTo(x + hash(r, 161) * 30 * s, yy); ctx.lineTo(x + (34 + hash(r, 162) * 22) * s, yy); }
+    }
+    ctx.stroke();
+    // A distant sailboat
+    const bx = wrap(900 * s - off * 0.7, W + 220 * s) - 100 * s;
+    ctx.fillStyle = `rgba(255,255,255,${0.9 * a})`; ctx.beginPath(); ctx.moveTo(bx, y - 2 * s); ctx.lineTo(bx, y - 34 * s); ctx.lineTo(bx + 20 * s, y - 2 * s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = rgba([60, 70, 90], a); ctx.fillRect(bx - 12 * s, y - 2 * s, 34 * s, 5 * s);
+  }
+  // Fairground skyline: a slowly turning ferris wheel and striped tents
+  function drawPark(base, off, s, col, a) {
+    const span = 760 * s, k0 = Math.floor((off - 300 * s) / span), k1 = Math.ceil((off + W + 300 * s) / span);
+    for (let k = k0; k <= k1; k++) {
+      const cx = k * span - off, cy = base - 130 * s, R = 96 * s;
+      ctx.strokeStyle = rgba(col, a); ctx.lineWidth = 4 * s;
+      ctx.beginPath(); ctx.moveTo(cx - 54 * s, base + 30 * s); ctx.lineTo(cx, cy); ctx.lineTo(cx + 54 * s, base + 30 * s); ctx.stroke();
+      circle(cx, cy, R); ctx.stroke();
+      ctx.lineWidth = 2 * s;
+      for (let i = 0; i < 10; i++) {
+        const t = (i / 10) * Math.PI * 2 + realNow * 0.12, ex = cx + Math.cos(t) * R, ey = cy + Math.sin(t) * R;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.fillStyle = rgba(mixRgb(col, i % 2 ? [226, 59, 59] : [255, 197, 49], 0.6), a); ctx.fillRect(ex - 7 * s, ey - 2 * s, 14 * s, 12 * s);
+      }
+      const tx = cx + 300 * s;
+      ctx.fillStyle = rgba(mixRgb(col, [226, 59, 59], 0.45), a); ctx.beginPath(); ctx.moveTo(tx - 70 * s, base + 30 * s); ctx.lineTo(tx - 70 * s, base - 30 * s); ctx.lineTo(tx, base - 86 * s); ctx.lineTo(tx + 70 * s, base - 30 * s); ctx.lineTo(tx + 70 * s, base + 30 * s); ctx.closePath(); ctx.fill();
+    }
+  }
+  // Packed stands around the arena with floodlights above
+  function drawStands(base, off, s, col, a) {
+    const top = base - 190 * s;
+    ctx.fillStyle = rgba(col, a); ctx.fillRect(0, top, W, H);
+    for (let r = 0; r < 9; r++) {
+      const y = top + 8 * s + r * 20 * s;
+      ctx.fillStyle = rgba(mixRgb(col, [0, 0, 0], 0.25), a); ctx.fillRect(0, y + 13 * s, W, 4 * s);
+      const span = 13 * s, shift = off * 0.6;
+      for (let k = Math.floor(shift / span); k * span - shift < W; k++) {
+        const c = hash(k, r + 171);
+        ctx.fillStyle = rgba(c < 0.33 ? [230, 90, 90] : c < 0.66 ? [235, 235, 240] : [90, 150, 230], 0.55 * a);
+        ctx.fillRect(k * span - shift, y + Math.sin(realNow * 3 + k + r) * 1.2 * s, 8 * s, 11 * s);
+      }
+    }
+    const span = 520 * s;
+    for (let k = Math.floor((off - 100) / span); k * span - off < W + 100; k++) {
+      const x = k * span - off + 120 * s;
+      ctx.fillStyle = rgba([60, 66, 80], a); ctx.fillRect(x - 3 * s, top - 40 * s, 6 * s, 60 * s);
+      ctx.fillStyle = `rgba(255,255,235,${0.95 * a})`; ctx.fillRect(x - 26 * s, top - 54 * s, 52 * s, 16 * s);
+      const g = ctx.createRadialGradient(x, top - 46 * s, 2, x, top - 46 * s, 130 * s);
+      g.addColorStop(0, `rgba(255,255,220,${0.45 * a})`); g.addColorStop(1, "rgba(255,255,220,0)");
+      ctx.fillStyle = g; ctx.fillRect(x - 130 * s, top - 176 * s, 260 * s, 260 * s);
     }
   }
 
@@ -2597,6 +3051,64 @@
       ctx.fillStyle = C.blue; rr(x - 0.45, y + 1.9, 0.9, 0.9, 0.12); ctx.fill();
       ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 0.05; rr(x - 0.38, y + 1.97, 0.76, 0.76, 0.09); ctx.stroke();
       ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 0.22, y + 2.08, 0.1, 0.54); ctx.fillRect(x + 0.12, y + 2.08, 0.1, 0.54); ctx.fillRect(x - 0.12, y + 2.3, 0.24, 0.1);
+    } else if (type === "crystal") {
+      const s = 0.7 + h * 0.8, hue = h > 0.5 ? [150, 110, 255] : [80, 220, 240];
+      for (const [dx, tall, lean] of [[-0.3, 0.8, -0.2], [0.05, 1.3, 0.05], [0.36, 0.7, 0.25]]) {
+        const bx = x + dx * s, tx = bx + lean * s, ty = y + tall * s;
+        ctx.fillStyle = rgba(hue, 0.9);
+        ctx.beginPath(); ctx.moveTo(bx - 0.14 * s, y); ctx.lineTo(tx - 0.1 * s, ty - 0.18 * s); ctx.lineTo(tx, ty); ctx.lineTo(tx + 0.1 * s, ty - 0.18 * s); ctx.lineTo(bx + 0.14 * s, y); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.beginPath(); ctx.moveTo(bx - 0.05 * s, y); ctx.lineTo(tx - 0.05 * s, ty - 0.2 * s); ctx.lineTo(tx, ty); ctx.closePath(); ctx.fill();
+      }
+      glows.push({ x, y: y + 0.6 * s, r: 2.2 * s, c: hue, a: 0.4 });
+    } else if (type === "stalagmite") {
+      const s = 0.6 + h * 1.1;
+      ctx.fillStyle = rgba(mixRgb(pal.grass, pal.stone, 0.3), 1);
+      ctx.beginPath(); ctx.moveTo(x - 0.5 * s, y); ctx.quadraticCurveTo(x - 0.16 * s, y + 0.7 * s, x, y + 1.7 * s); ctx.quadraticCurveTo(x + 0.16 * s, y + 0.7 * s, x + 0.5 * s, y); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = rgba(pal.grassTop, 0.5);
+      ctx.beginPath(); ctx.moveTo(x - 0.26 * s, y); ctx.quadraticCurveTo(x - 0.08 * s, y + 0.6 * s, x, y + 1.6 * s); ctx.lineTo(x - 0.02 * s, y); ctx.closePath(); ctx.fill();
+    } else if (type === "mushroom") {
+      const s = 0.6 + h * 0.8, hue = h > 0.5 ? [90, 240, 170] : [255, 140, 220];
+      ctx.fillStyle = "#d8d3c8"; ctx.fillRect(x - 0.07 * s, y, 0.14 * s, 0.5 * s);
+      ctx.fillStyle = rgba(hue, 1); ctx.beginPath(); ctx.ellipse(x, y + 0.5 * s, 0.36 * s, 0.24 * s, 0, 0, Math.PI); ctx.closePath(); ctx.fill();
+      glows.push({ x, y: y + 0.55 * s, r: 1.5 * s, c: hue, a: 0.4 });
+    } else if (type === "umbrella") {
+      const c = h > 0.66 ? "#e23b3b" : h > 0.33 ? "#1f6fd1" : "#ffc531";
+      ctx.save(); ctx.translate(x, y); ctx.rotate(-0.12 + h * 0.24);
+      ctx.fillStyle = "#f4efe3"; ctx.fillRect(-0.04, 0, 0.08, 2.1);
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(0, 1.95, 1.05, 0, Math.PI); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(-0.35, 1.95); ctx.quadraticCurveTo(-0.2, 2.6, 0, 3.0); ctx.quadraticCurveTo(0.2, 2.6, 0.35, 1.95); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    } else if (type === "lifeguard") {
+      ctx.strokeStyle = "#8a5a34"; ctx.lineWidth = 0.11;
+      ctx.beginPath(); ctx.moveTo(x - 0.65, y); ctx.lineTo(x - 0.42, y + 1.6); ctx.moveTo(x + 0.65, y); ctx.lineTo(x + 0.42, y + 1.6); ctx.moveTo(x - 0.6, y + 0.7); ctx.lineTo(x + 0.6, y + 0.7); ctx.stroke();
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 0.62, y + 1.6, 1.24, 0.75);
+      ctx.fillStyle = C.red; ctx.fillRect(x - 0.72, y + 2.35, 1.44, 0.2); medCross(x, y + 1.97, 0.46);
+    } else if (type === "roadsign") {
+      ctx.fillStyle = "#5b6b78"; ctx.fillRect(x - 0.06, y, 0.12, 2.3);
+      ctx.fillStyle = "#2f8f4e"; rr(x - 0.75, y + 2.0, 1.5, 0.8, 0.08); ctx.fill();
+      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 0.04; rr(x - 0.68, y + 2.07, 1.36, 0.66, 0.05); ctx.stroke();
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 0.5, y + 2.42, 0.8, 0.1); ctx.fillRect(x - 0.5, y + 2.24, 1.0, 0.1);
+    } else if (type === "tire") {
+      const s = 0.8 + h * 0.5;
+      for (let k = 0; k < 3; k++) { const cy = y + (0.15 + k * 0.3) * s; ctx.fillStyle = k % 2 ? "#e23b3b" : "#1f262d"; ctx.beginPath(); ctx.ellipse(x, cy, 0.5 * s, 0.15 * s, 0, 0, Math.PI * 2); ctx.fill(); }
+    } else if (type === "banner") {
+      ctx.fillStyle = "#5b6b78"; ctx.fillRect(x - 0.05, y, 0.1, 2.8);
+      const c = ["#e23b3b", "#ffc531", "#1f6fd1"][Math.floor(h * 3)];
+      ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(x + 0.05, y + 2.8);
+      for (let k = 0; k <= 6; k++) ctx.lineTo(x + 0.05 + k * 0.22, y + 2.8 + Math.sin(realNow * 4 + k + h * 9) * 0.06);
+      for (let k = 6; k >= 0; k--) ctx.lineTo(x + 0.05 + k * 0.22, y + 2.15 + Math.sin(realNow * 4 + k + h * 9) * 0.06);
+      ctx.closePath(); ctx.fill();
+    } else if (type === "balloon") {
+      const bob = Math.sin(realNow * 1.4 + h * 9) * 0.12, c = ["#e23b3b", "#ffc531", "#1f6fd1", "#22b26a"][Math.floor(h * 4)];
+      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 0.025; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 2 + bob); ctx.stroke();
+      ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(x, y + 2.4 + bob, 0.34, 0.42, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.5)"; circle(x - 0.1, y + 2.54 + bob, 0.08); ctx.fill();
+    } else if (type === "reeds") {
+      ctx.strokeStyle = rgba(pal.treeDark, 1); ctx.lineWidth = 0.045; ctx.beginPath();
+      for (let k = 0; k < 6; k++) { const dx = (k - 2.5) * 0.17, top = 0.8 + hash(k, h * 7) * 0.7; ctx.moveTo(x + dx, y); ctx.quadraticCurveTo(x + dx, y + top * 0.6, x + dx + dx * 0.3, y + top); }
+      ctx.stroke();
+      ctx.fillStyle = "#6b4a2e"; for (let k = 1; k < 6; k += 2) { const dx = (k - 2.5) * 0.17, top = 0.8 + hash(k, h * 7) * 0.7; rr(x + dx * 1.3 - 0.035, y + top - 0.04, 0.07, 0.24, 0.03); ctx.fill(); }
     } else if (type === "cactus") {
       const s = 0.8 + h * 0.6;
       ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -2718,19 +3230,21 @@
   function drawMarkers(pal) {
     const [x0, x1] = viewRange();
     const texts = [];
-    for (let n = Math.max(1, Math.floor(x0 / 100)); n * 100 <= x1 + 2; n++) {
-      const x = n * 100 + START_X, y = groundY(x) - 0.1;
-      if (x < x0 - 2) continue;
+    const offset = !run ? 0 : run.heli ? run.dist - (run.heli.x - START_X) : run.dist - (run.farX - START_X);
+    for (let n = Math.floor((x0 - START_X + offset) / 100); n * 100 + START_X - offset <= x1 + 2; n++) {
+      const x = n * 100 + START_X - offset;
+      if (!n || x < 16) continue;
+      const y = groundY(x) - 0.1;
       ctx.fillStyle = "#8a5a34"; ctx.fillRect(x - 0.08, y, 0.16, 1.9);
-      ctx.fillStyle = "#ffffff"; rr(x - 0.8, y + 1.45, 1.6, 0.62, 0.12); ctx.fill();
+      ctx.fillStyle = "#ffffff"; rr(x - 1.0, y + 1.45, 2.0, 0.62, 0.12); ctx.fill();
       ctx.strokeStyle = C.ink; ctx.lineWidth = 0.06; ctx.stroke();
-      texts.push([`${n * 100} m`, x, y + 1.76]);
+      texts.push([`${fmt(n * 100)} m`, x, y + 1.76]);
     }
     let flag = null;
     const best = save.best[MAP.id];
     if (best > 20) {
-      const x = best + START_X;
-      if (x > x0 - 3 && x < x1 + 3) {
+      const x = best + START_X - offset;
+      if (x > Math.max(16, x0 - 3) && x < x1 + 3) {
         const y = groundY(x) - 0.1;
         ctx.fillStyle = "#ffffff"; ctx.fillRect(x - 0.06, y, 0.12, 3.2);
         ctx.fillStyle = C.red; ctx.beginPath(); ctx.moveTo(x + 0.06, y + 3.2); ctx.lineTo(x + 1.6, y + 2.85); ctx.lineTo(x + 0.06, y + 2.45); ctx.closePath(); ctx.fill();
@@ -2777,6 +3291,17 @@
       }
       ctx.stroke();
     }
+    // Steel supports under the coaster track
+    if (MAP.surface === "rails") {
+      ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 0.07; ctx.beginPath();
+      for (let i = i0 - (i0 % 12); i <= i1; i += 12) {
+        const x = gx(i), y = ground[i], nx = gx(i + 12), ny = ground[Math.min(i + 12, ground.length - 1)];
+        ctx.moveTo(x, y); ctx.lineTo(x, bottom);
+        ctx.moveTo(x, y - 1.3); ctx.lineTo(nx, ny - 3.2); ctx.moveTo(nx, ny - 1.3); ctx.lineTo(x, y - 3.2);
+        ctx.moveTo(x, y - 3.2); ctx.lineTo(nx, ny - 5.1); ctx.moveTo(nx, ny - 3.2); ctx.lineTo(x, y - 5.1);
+      }
+      ctx.stroke();
+    }
     // darker strata line
     ctx.beginPath(); edge();
     ctx.lineWidth = 2.6; ctx.strokeStyle = rgba(pal.soil, 1); ctx.stroke();
@@ -2804,6 +3329,21 @@
     // highlight edge + grass tufts
     ctx.beginPath(); edge();
     ctx.lineWidth = 0.09; ctx.strokeStyle = rgba(pal.grassTop, 1); ctx.lineJoin = "round"; ctx.stroke();
+    if (MAP.surface === "road") {          // dashed centre line
+      ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.beginPath();
+      for (let i = i0 - (i0 % 9); i <= i1 - 4; i += 9) {
+        if (gx(i) < 22) continue;
+        ctx.moveTo(gx(i), ground[i] - 0.25); ctx.lineTo(gx(i + 4), ground[i + 4] - 0.25); ctx.lineTo(gx(i + 4), ground[i + 4] - 0.31); ctx.lineTo(gx(i), ground[i] - 0.31); ctx.closePath();
+      }
+      ctx.fill();
+    } else if (MAP.surface === "rails") {  // wooden ties across the track
+      ctx.fillStyle = "#3a2a1c"; ctx.beginPath();
+      for (let i = i0 - (i0 % 3); i <= i1; i += 3) {
+        if (gx(i) < 22) continue;
+        ctx.rect(gx(i) - 0.07, ground[i] - 0.3, 0.14, 0.26);
+      }
+      ctx.fill();
+    }
     if (pal.tufts > 0.5) {
       ctx.fillStyle = rgba(pal.grassTop, 1);
       ctx.beginPath();
@@ -2815,6 +3355,65 @@
         ctx.moveTo(x + 0.02, y); ctx.lineTo(x + 0.1, y + hgt * 0.8); ctx.lineTo(x + 0.14, y);
       }
       ctx.fill();
+    }
+  }
+
+  // Water, mud, logs and thick trees. The back layer goes behind the vehicle, the front layer over its wheels.
+  function zonePath(q, level) {
+    ctx.beginPath(); ctx.moveTo(q.cx - q.r, level); ctx.lineTo(q.cx + q.r, level);
+    for (let x = q.cx + q.r; x >= q.cx - q.r; x -= 0.35) ctx.lineTo(x, Math.min(groundY(x), level));
+    ctx.closePath();
+  }
+  const zoneLevel = (q) => Math.min(groundY(q.cx - q.r), groundY(q.cx + q.r)) - 0.03;
+  const zoneColor = (z, a) => (z.kind === "water" ? `rgba(70,160,230,${a})` : `rgba(72,48,26,${a})`);
+  function drawZonesBack(pal) {
+    const [x0, x1] = viewRange();
+    if (MAP.logs) {
+      for (let c = Math.floor((x0 - 2) / LOG_CELL) - 1; c <= Math.ceil((x1 + 2) / LOG_CELL); c++) {
+        const q = logAt(c);
+        if (q.cx < 60 || q.cx < x0 - 2 || q.cx > x1 + 2) continue;
+        const y = groundY(q.cx) - q.r * 0.42;
+        ctx.fillStyle = rgba(pal.trunk, 1); circle(q.cx, y, q.r); ctx.fill(); ctx.lineWidth = 0.05; ctx.strokeStyle = C.ink; ctx.stroke();
+        ctx.fillStyle = "#c9a26a"; circle(q.cx, y, q.r * 0.68); ctx.fill();
+        ctx.strokeStyle = "rgba(90,60,30,0.6)"; ctx.lineWidth = 0.03; circle(q.cx, y, q.r * 0.4); ctx.stroke();
+      }
+    }
+    const z = MAP.zones;
+    if (!z) return;
+    for (let c = Math.floor((x0 - z.r[1]) / z.cell) - 1; c <= Math.ceil((x1 + z.r[1]) / z.cell) + 1; c++) {
+      const q = zoneCell(z, c);
+      if (q.cx < 60 || q.cx + q.r < x0 - 2 || q.cx - q.r > x1 + 2) continue;
+      if (z.kind === "thicket") {
+        // Close-packed trees standing right beside the road
+        for (let k = 0, x = q.cx - q.r; x < q.cx + q.r; k++, x += 1.5) {
+          const h = hash(c * 53 + k, 181);
+          drawDecorItem(h > 0.5 ? "pine" : "tree", x + h * 0.6, groundY(x + h * 0.6) - 0.1, pal, h);
+        }
+        continue;
+      }
+      const level = zoneLevel(q);
+      zonePath(q, level); ctx.fillStyle = zoneColor(z, z.kind === "water" ? 0.75 : 0.95); ctx.fill();
+      ctx.strokeStyle = z.kind === "water" ? "rgba(255,255,255,0.75)" : "rgba(170,130,90,0.7)"; ctx.lineWidth = 0.05;
+      let a = q.cx - q.r, b = q.cx + q.r;
+      while (a < b && groundY(a) >= level) a += 0.2;
+      while (b > a && groundY(b) >= level) b -= 0.2;
+      if (b > a) { ctx.beginPath(); ctx.moveTo(a, level); ctx.lineTo(b, level); ctx.stroke(); }
+    }
+  }
+  function drawZonesFront(pal) {
+    const z = MAP.zones;
+    if (!z) return;
+    const [x0, x1] = viewRange();
+    for (let c = Math.floor((x0 - z.r[1]) / z.cell) - 1; c <= Math.ceil((x1 + z.r[1]) / z.cell) + 1; c++) {
+      const q = zoneCell(z, c);
+      if (q.cx < 60 || q.cx + q.r < x0 - 2 || q.cx - q.r > x1 + 2) continue;
+      if (z.kind === "thicket") {
+        // Low undergrowth brushing past the wheels
+        for (let k = 0, x = q.cx - q.r; x < q.cx + q.r; k++, x += 1.25) {
+          const h = hash(c * 71 + k, 182);
+          drawDecorItem("bush", x + h * 0.5, groundY(x + h * 0.5) - 0.2, pal, h * 0.6);
+        }
+      } else { zonePath(q, zoneLevel(q)); ctx.fillStyle = zoneColor(z, z.kind === "water" ? 0.4 : 0.65); ctx.fill(); }
     }
   }
 
@@ -2971,7 +3570,7 @@
     // Soft ground shadow
     const gy = groundY(p.x), hgt = p.y - gy;
     const sa = clamp(0.28 - hgt * 0.04, 0, 0.28);
-    if (sa > 0) { ctx.fillStyle = `rgba(0,0,0,${sa})`; ctx.beginPath(); ctx.ellipse(p.x, gy + 0.03, VEH.id === "fire" ? 2.4 : 1.8, 0.16, 0, 0, Math.PI * 2); ctx.fill(); }
+    if (sa > 0) { ctx.fillStyle = `rgba(0,0,0,${sa})`; ctx.beginPath(); ctx.ellipse(p.x, gy + 0.03, VEH.shadow || 1.8, 0.16, 0, 0, Math.PI * 2); ctx.fill(); }
 
     // Headlight beam at night
     if (pal.night > 0.05) {
@@ -2997,28 +3596,23 @@
 
     ctx.save();
     ctx.translate(p.x, p.y); ctx.rotate(a);
-    if (VEH.id === "police") drawPoliceBody();
-    else if (VEH.id === "fire") drawFireBody();
-    else drawAmbulanceBody();
+    VEH.draw();
     // Wheel arches
-    ctx.fillStyle = "#1c242c";
-    const archR = VEH.wheelR + 0.11;
-    for (const lx of VEH.wheels) { ctx.beginPath(); ctx.arc(lx, -0.12, archR, 0, Math.PI); ctx.closePath(); ctx.fill(); }
+    if (VEH.arches !== false) {
+      ctx.fillStyle = "#1c242c";
+      const archR = VEH.wheelR + 0.11;
+      for (const lx of VEH.wheels) { ctx.beginPath(); ctx.arc(lx, -0.12, archR, 0, Math.PI); ctx.closePath(); ctx.fill(); }
+    }
     ctx.restore();
 
     for (const wp of WP) drawWheel(wp, VEH.wheelR);
 
+    if (VEH.over && !car.blown) VEH.over(P, WP);
+
     // Lettering
-    if (VEH.id === "police") {
-      const tp = wpt(P, -0.48, 0.2);
-      worldText("POLICE", tp.x, tp.y, 0.2, C.ink, { rot: a });
-    } else if (VEH.id === "fire") {
-      const tp = wpt(P, -0.66, 0.7), np = wpt(P, 1.03, 0.45);
-      worldText("FIRE DEPT", tp.x, tp.y, 0.22, "#ffffff", { rot: a, stroke: 0.2 });
-      worldText("7", np.x, np.y, 0.26, C.gold, { rot: a, stroke: 0.22 });
-    } else {
-      const tp = wpt(P, -0.52, 0.225);
-      worldText("AMBULANCE", tp.x, tp.y, 0.17, "#ffffff", { rot: a });
+    for (const l of VEH.labels) {
+      const tp = wpt(P, l.x, l.y);
+      worldText(l.t, tp.x, tp.y, l.size, l.color, { rot: a, stroke: l.stroke });
     }
     ctx.filter = "none";
   }
@@ -3050,11 +3644,11 @@
     const phase = beaconPhase();
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    const bcn = wpt({ x: h.x, y: h.y, a: h.a }, -0.4, 1.0);
+    const bcn = wpt({ x: h.x, y: h.y, a: h.a }, -0.4 * h.dir, 1.0);
     glowAt(bcn.x, bcn.y, 1.3 + clamp(pal.night, 0, 1), phase ? [255, 70, 70] : [70, 150, 255], 0.4);
     ctx.restore();
     ctx.save();
-    ctx.translate(h.x, h.y); ctx.rotate(h.a);
+    ctx.translate(h.x, h.y); ctx.scale(h.dir, 1); ctx.rotate(h.a);
     ctx.lineJoin = "round"; ctx.lineCap = "round";
     const t = realNow;
     // Skids
@@ -3104,8 +3698,8 @@
     const blade = Math.cos(t * 26) * 3.1;
     ctx.strokeStyle = "#2b343d"; ctx.lineWidth = 0.07; ctx.beginPath(); ctx.moveTo(-blade, 1.22); ctx.lineTo(blade, 1.22); ctx.stroke();
     ctx.restore();
-    const tp = wpt({ x: h.x, y: h.y, a: h.a }, 0.35, -0.28);
-    worldText("AIR MEDEVAC", tp.x, tp.y, 0.17, "#ffffff", { rot: h.a });
+    const tp = { x: h.x + h.dir * (Math.cos(h.a) * 0.35 + Math.sin(h.a) * 0.28), y: h.y + Math.sin(h.a) * 0.35 - Math.cos(h.a) * 0.28 };
+    worldText("AIR MEDEVAC", tp.x, tp.y, 0.17, "#ffffff", { rot: h.dir * h.a });
   }
 
   function drawAmbulanceBody() {
@@ -3329,6 +3923,273 @@
     ctx.fillStyle = "#44505c"; rr(-2.18, -0.18, 0.2, 0.16, 0.05); ctx.fill(); ctx.stroke();
   }
 
+  // Drawing shorthands for the vehicle bodies: filled and inked shapes in local metres
+  function inkBox(x, y, w, h, r, fill, lw = 0.05) { rr(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = C.ink; ctx.stroke(); }
+  function polyPath(pts) { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); }
+  function inkPoly(pts, fill, lw = 0.055) { polyPath(pts); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = C.ink; ctx.stroke(); }
+  function paintGrad(y0, y1, a, b, c) { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, a); g.addColorStop(0.45, b); g.addColorStop(1, c); return g; }
+  function clipped(pathFn, drawFn) { ctx.save(); pathFn(); ctx.clip(); drawFn(); ctx.restore(); }
+  function windowGlass(x, y, w, h) { inkBox(x, y, w, h, 0.05, glassGrad(y, y + h), 0.04); ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillRect(x + w * 0.15, y + 0.02, w * 0.14, h - 0.04); }
+  function medCross(x, y, s, fill = C.red) { ctx.fillStyle = fill; ctx.fillRect(x - s * 0.17, y - s / 2, s * 0.34, s); ctx.fillRect(x - s / 2, y - s * 0.17, s, s * 0.34); }
+  function personHead(x, y, r, hatFill) {
+    ctx.fillStyle = "#f1c29c"; circle(x, y, r); ctx.fill();
+    ctx.fillStyle = hatFill; ctx.beginPath(); ctx.arc(x, y + r * 0.2, r * 1.1, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = C.ink; circle(x + r * 0.55, y - r * 0.1, r * 0.16); ctx.fill();
+  }
+  function lightBar(x, y, w) {
+    const phase = beaconPhase(), lamp = (w - 0.04) / 2;
+    inkBox(x, y, w, 0.05, 0.02, "#2b343d", 0.02);
+    inkBox(x + 0.01, y + 0.04, lamp, 0.1, 0.04, phase ? "#ff4d4d" : "#8e2a2a", 0.03);
+    inkBox(x + 0.03 + lamp, y + 0.04, lamp, 0.1, 0.04, phase ? "#3b6fb0" : "#59a8ff", 0.03);
+  }
+
+  function drawRetroBody() {
+    inkBox(-1.56, -0.24, 3.14, 0.22, 0.05, "#34404b");
+    const paint = paintGrad(-0.06, 1.15, "#d9cdb4", "#f6ecd6", "#efe3ca");
+    const body = () => polyPath([[-1.62, -0.06], [1.6, -0.06], [1.62, 0.38], [1.18, 0.42], [0.95, 0.9], [0.58, 0.9], [0.58, 1.15], [-1.62, 1.15]]);
+    body(); ctx.fillStyle = paint; ctx.fill();
+    clipped(body, () => { ctx.fillStyle = "#e8742c"; ctx.fillRect(-1.7, 0.17, 3.4, 0.26); ctx.fillStyle = "#b5531c"; ctx.fillRect(-1.7, 0.13, 3.4, 0.04); });
+    body(); ctx.lineWidth = 0.06; ctx.strokeStyle = C.ink; ctx.stroke();
+    const win = () => polyPath([[0.66, 0.5], [1.12, 0.5], [0.92, 0.8], [0.66, 0.8]]);
+    win(); ctx.fillStyle = glassGrad(0.5, 0.8); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = "#3a6ea5"; rr(0.68, 0.42, 0.3, 0.16, 0.05); ctx.fill(); personHead(0.82, 0.63, 0.1, "#7a4b2a"); });
+    win(); ctx.lineWidth = 0.045; ctx.stroke();
+    windowGlass(-0.3, 0.6, 0.62, 0.34);
+    medCross(-1.0, 0.76, 0.42);
+    ctx.strokeStyle = "rgba(20,33,43,0.35)"; ctx.lineWidth = 0.025; ctx.beginPath(); ctx.moveTo(0.5, 0); ctx.lineTo(0.5, 1.1); ctx.moveTo(-1.42, 0); ctx.lineTo(-1.42, 1.1); ctx.stroke();
+    // Round dome light, round headlight, chrome bumpers
+    inkBox(-0.02, 1.15, 0.24, 0.05, 0.02, "#5d6b78", 0.02);
+    const on = beaconPhase();
+    ctx.fillStyle = on ? "#ff4d4d" : "#8e2a2a"; ctx.beginPath(); ctx.arc(0.1, 1.2, 0.12, 0, Math.PI); ctx.fill(); ctx.lineWidth = 0.03; ctx.stroke();
+    ctx.fillStyle = "#fff0a8"; circle(1.54, 0.25, 0.09); ctx.fill(); ctx.lineWidth = 0.03; ctx.strokeStyle = C.ink; ctx.stroke();
+    inkBox(-1.62, 0.4, 0.07, 0.24, 0.02, "#e0302f", 0.03);
+    inkBox(1.5, -0.17, 0.2, 0.15, 0.04, "#c9d2db", 0.04);
+    inkBox(-1.72, -0.17, 0.2, 0.15, 0.04, "#c9d2db", 0.04);
+  }
+
+  function drawMotoBody() {
+    // Frame and forks
+    ctx.lineCap = "round"; ctx.strokeStyle = "#2b343d";
+    ctx.lineWidth = 0.13; ctx.beginPath(); ctx.moveTo(-0.78, -0.3); ctx.lineTo(-0.15, 0.08); ctx.lineTo(0.5, 0.2); ctx.stroke();
+    ctx.lineWidth = 0.09; ctx.beginPath(); ctx.moveTo(0.82, -0.34); ctx.lineTo(0.58, 0.42); ctx.stroke();
+    // Engine, exhaust, tank, seat
+    inkBox(-0.3, -0.14, 0.52, 0.26, 0.06, "#4a5562");
+    inkBox(-0.98, -0.1, 0.72, 0.09, 0.04, "#c9d2db", 0.03);
+    const tank = () => polyPath([[-0.02, 0.1], [0.52, 0.12], [0.6, 0.34], [0.34, 0.44], [-0.02, 0.34]]);
+    tank(); ctx.fillStyle = paintGrad(0.1, 0.44, "#cf2a2a", "#ef4c4c", "#d83636"); ctx.fill(); ctx.lineWidth = 0.05; ctx.strokeStyle = C.ink; ctx.stroke();
+    inkBox(-0.5, 0.14, 0.5, 0.11, 0.05, "#1f262d");
+    // Medical box on the back with its light
+    inkBox(-1.02, 0.2, 0.5, 0.42, 0.05, "#ffffff");
+    medCross(-0.77, 0.41, 0.26);
+    lightBar(-0.94, 0.64, 0.56);
+    // Fairing and headlight
+    inkPoly([[0.52, 0.3], [0.84, 0.28], [0.92, 0.46], [0.62, 0.62]], "#ffffff");
+    inkBox(0.86, 0.28, 0.1, 0.13, 0.03, "#fff0a8", 0.03);
+    // Rider
+    ctx.lineCap = "round"; ctx.strokeStyle = "#1a4f95";
+    ctx.lineWidth = 0.15; ctx.beginPath(); ctx.moveTo(-0.22, 0.26); ctx.lineTo(0.02, 0.03); ctx.lineTo(0.22, -0.06); ctx.stroke();
+    ctx.strokeStyle = C.red; ctx.lineWidth = 0.27; ctx.beginPath(); ctx.moveTo(-0.2, 0.3); ctx.lineTo(0.05, 0.76); ctx.stroke();
+    ctx.lineWidth = 0.1; ctx.strokeStyle = "#a9232b"; ctx.beginPath(); ctx.moveTo(0.05, 0.68); ctx.lineTo(0.33, 0.56); ctx.lineTo(0.58, 0.54); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; circle(0.2, 1.0, 0.17); ctx.fill(); ctx.lineWidth = 0.05; ctx.strokeStyle = C.ink; ctx.stroke();
+    medCross(0.14, 1.03, 0.13);
+    ctx.fillStyle = "#2f4a68"; rr(0.23, 0.94, 0.14, 0.09, 0.03); ctx.fill();
+    ctx.lineCap = "butt";
+  }
+
+  function drawSportsBody() {
+    inkBox(-1.62, -0.14, 3.3, 0.14, 0.05, "#1c242c");
+    const body = () => {
+      ctx.beginPath();
+      ctx.moveTo(-1.72, -0.02); ctx.lineTo(1.72, -0.02); ctx.quadraticCurveTo(1.82, 0.02, 1.76, 0.14);
+      ctx.quadraticCurveTo(1.2, 0.3, 0.6, 0.34); ctx.lineTo(0.14, 0.64); ctx.quadraticCurveTo(0.08, 0.68, 0, 0.68);
+      ctx.lineTo(-0.5, 0.68); ctx.lineTo(-0.98, 0.36); ctx.lineTo(-1.74, 0.32); ctx.closePath();
+    };
+    body(); ctx.fillStyle = paintGrad(-0.02, 0.68, "#a31c22", "#e4323a", "#c8252c"); ctx.fill();
+    clipped(body, () => { ctx.fillStyle = "#ffffff"; ctx.fillRect(-1.8, 0.2, 3.6, 0.03); });
+    body(); ctx.lineWidth = 0.055; ctx.strokeStyle = C.ink; ctx.stroke();
+    // Spoiler
+    inkBox(-1.82, 0.5, 0.5, 0.06, 0.02, "#1c242c", 0.03);
+    ctx.fillStyle = "#1c242c"; ctx.fillRect(-1.6, 0.32, 0.06, 0.2);
+    // Windows with the driver
+    const win = () => polyPath([[-0.72, 0.36], [0.5, 0.36], [0.1, 0.62], [-0.46, 0.62]]);
+    win(); ctx.fillStyle = glassGrad(0.36, 0.62); ctx.fill();
+    clipped(win, () => personHead(0.02, 0.48, 0.095, "#ffffff"));
+    win(); ctx.lineWidth = 0.04; ctx.strokeStyle = C.ink; ctx.stroke();
+    medCross(0.72, 0.21, 0.17, "#ffffff");
+    lightBar(-0.48, 0.67, 0.68);
+    inkBox(1.62, 0.13, 0.13, 0.08, 0.03, "#fff0a8", 0.025);
+    inkBox(-1.76, 0.2, 0.06, 0.1, 0.02, "#ff4040", 0.025);
+    inkBox(-1.86, 0.0, 0.16, 0.06, 0.02, "#c9d2db", 0.025);
+  }
+
+  function drawSnowBody() {
+    // Track wraps around the rear rollers
+    inkBox(-1.32, -0.66, 1.34, 0.62, 0.3, "#1f262d", 0.05);
+    ctx.fillStyle = "#3a444e";
+    for (let k = 0; k < 8; k++) ctx.fillRect(-1.24 + k * 0.16, -0.68, 0.07, 0.05);
+    // Rear rack, seat, hood
+    inkBox(-1.22, 0.08, 0.5, 0.42, 0.05, "#ffffff");
+    medCross(-0.97, 0.29, 0.26);
+    lightBar(-1.2, 0.5, 0.0 + 0.36);
+    inkBox(-0.76, 0.04, 0.86, 0.15, 0.06, "#1f262d");
+    const hood = () => polyPath([[0.02, -0.08], [1.0, -0.08], [1.12, 0.2], [0.72, 0.5], [0.22, 0.44]]);
+    hood(); ctx.fillStyle = paintGrad(-0.08, 0.5, "#17558f", "#2b86d4", "#2373be"); ctx.fill(); ctx.lineWidth = 0.055; ctx.strokeStyle = C.ink; ctx.stroke();
+    inkPoly([[0.46, 0.46], [0.74, 0.5], [0.62, 0.78], [0.5, 0.72]], glassGrad(0.46, 0.78), 0.04);
+    inkBox(0.98, 0.26, 0.1, 0.1, 0.03, "#fff0a8", 0.03);
+    // Rider in rescue orange
+    ctx.lineCap = "round"; ctx.strokeStyle = "#d97a00"; ctx.lineWidth = 0.15;
+    ctx.beginPath(); ctx.moveTo(-0.26, 0.2); ctx.lineTo(0.1, 0.1); ctx.lineTo(0.16, -0.1); ctx.stroke();
+    ctx.strokeStyle = C.amber; ctx.lineWidth = 0.27; ctx.beginPath(); ctx.moveTo(-0.26, 0.28); ctx.lineTo(-0.1, 0.74); ctx.stroke();
+    ctx.lineWidth = 0.1; ctx.strokeStyle = "#d97a00"; ctx.beginPath(); ctx.moveTo(-0.1, 0.66); ctx.lineTo(0.2, 0.5); ctx.lineTo(0.44, 0.52); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; circle(0, 1.0, 0.17); ctx.fill(); ctx.lineWidth = 0.05; ctx.strokeStyle = C.ink; ctx.stroke();
+    ctx.fillStyle = "#2f4a68"; rr(0.03, 0.94, 0.14, 0.09, 0.03); ctx.fill();
+    ctx.lineCap = "butt";
+  }
+  // The ski sits over the front wheel
+  function drawSnowOver(P, WP) {
+    const w = WP[WP.length - 1], a = P.a;
+    ctx.save(); ctx.translate(w.x, w.y); ctx.rotate(a);
+    ctx.strokeStyle = "#2b343d"; ctx.lineWidth = 0.09; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 0.3); ctx.stroke();
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 0.17; ctx.beginPath(); ctx.moveTo(-0.5, -0.24); ctx.lineTo(0.42, -0.24); ctx.quadraticCurveTo(0.68, -0.24, 0.78, -0.02); ctx.stroke();
+    ctx.strokeStyle = "#e23b3b"; ctx.lineWidth = 0.08; ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawTrainBody() {
+    inkBox(-2.6, -0.21, 5.2, 0.24, 0.05, "#2b343d");
+    // Boiler
+    const boiler = () => rr(-0.62, 0.08, 3.0, 0.84, 0.32);
+    boiler(); ctx.fillStyle = paintGrad(0.08, 0.92, "#b5262b", "#ef4c4c", "#d83636"); ctx.fill(); ctx.lineWidth = 0.06; ctx.strokeStyle = C.ink; ctx.stroke();
+    ctx.fillStyle = "#ffffff"; rr(0.3, 0.26, 1.1, 0.32, 0.04); ctx.fill();
+    ctx.fillStyle = "#c9d2db"; for (const bx of [0.08, 1.58, 2.08]) ctx.fillRect(bx, 0.08, 0.08, 0.84);
+    // Chimney and dome
+    inkPoly([[1.48, 0.92], [1.72, 0.92], [1.8, 1.3], [1.4, 1.3]], "#34404b");
+    inkBox(0.72, 0.92, 0.36, 0.2, 0.1, "#ffc531");
+    // Cab
+    inkBox(-2.5, -0.02, 1.92, 1.46, 0.06, "#ffffff", 0.06);
+    inkBox(-2.6, 1.42, 2.12, 0.1, 0.04, "#34404b");
+    const win = () => rr(-1.28, 0.72, 0.62, 0.52, 0.05);
+    win(); ctx.fillStyle = glassGrad(0.72, 1.24); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = "#1d3557"; rr(-1.2, 0.64, 0.42, 0.24, 0.07); ctx.fill(); personHead(-0.98, 0.98, 0.12, "#1d3557"); });
+    win(); ctx.lineWidth = 0.045; ctx.strokeStyle = C.ink; ctx.stroke();
+    windowGlass(-2.3, 0.72, 0.62, 0.52);
+    medCross(-1.54, 0.34, 0.5);
+    lightBar(-2.02, 1.52, 0.86);
+    // Front lamp and cow catcher
+    inkBox(2.3, 0.54, 0.12, 0.18, 0.04, "#fff0a8", 0.03);
+    inkPoly([[2.38, 0.08], [2.62, 0.08], [3.02, -0.5], [2.38, -0.5]], "#34404b");
+  }
+  function drawTrainOver(P, WP) {
+    // Side rod linking the driving wheels; it rises and falls as they turn
+    const wa = car.wheels[2].b.getAngle(), rx = Math.cos(wa) * 0.2, ry = Math.sin(wa) * 0.2;
+    ctx.lineCap = "round"; ctx.strokeStyle = "#c9d2db"; ctx.lineWidth = 0.075;
+    for (const [a, b] of [[0, 1], [2, 3]]) { ctx.beginPath(); ctx.moveTo(WP[a].x + rx, WP[a].y + ry); ctx.lineTo(WP[b].x + rx, WP[b].y + ry); ctx.stroke(); }
+    ctx.lineCap = "butt";
+  }
+
+  function drawTruckBody() {
+    inkBox(-2.14, -0.26, 4.26, 0.24, 0.06, "#34404b");
+    // Cargo box
+    inkBox(-2.1, -0.04, 2.8, 1.52, 0.06, paintGrad(-0.04, 1.48, "#dbe2ea", "#ffffff", "#f1f5f8"), 0.06);
+    ctx.fillStyle = C.blue; ctx.fillRect(-2.08, 0.36, 2.76, 0.07);
+    ctx.fillStyle = C.red; ctx.fillRect(-2.08, 0.27, 2.76, 0.09);
+    medCross(-0.7, 1.12, 0.5);
+    ctx.strokeStyle = "rgba(20,33,43,0.25)"; ctx.lineWidth = 0.02; ctx.beginPath(); ctx.moveTo(-2.0, 0); ctx.lineTo(-2.0, 1.44); ctx.stroke();
+    // Cab
+    const cab = () => polyPath([[0.72, -0.08], [2.02, -0.08], [2.02, 0.56], [1.72, 1.18], [0.72, 1.18]]);
+    cab(); ctx.fillStyle = paintGrad(-0.08, 1.18, "#17559f", "#2f86e6", "#1f6fd1"); ctx.fill(); ctx.lineWidth = 0.06; ctx.strokeStyle = C.ink; ctx.stroke();
+    const win = () => polyPath([[1.1, 0.62], [1.84, 0.62], [1.62, 1.06], [1.1, 1.06]]);
+    win(); ctx.fillStyle = glassGrad(0.62, 1.06); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = "#34404b"; rr(1.2, 0.54, 0.36, 0.2, 0.06); ctx.fill(); personHead(1.38, 0.82, 0.12, "#e23b3b"); });
+    win(); ctx.lineWidth = 0.045; ctx.strokeStyle = C.ink; ctx.stroke();
+    lightBar(1.1, 1.18, 0.62);
+    inkBox(1.92, 0.22, 0.1, 0.16, 0.03, "#fff0a8", 0.03);
+    inkBox(1.92, -0.22, 0.26, 0.2, 0.05, "#c9d2db", 0.04);
+    inkBox(-2.13, 0.4, 0.06, 0.2, 0.02, "#e0302f", 0.03);
+  }
+
+  function drawBusBody() {
+    inkBox(-2.2, -0.22, 4.44, 0.2, 0.06, "#34404b");
+    const body = () => rr(-2.26, -0.08, 4.56, 1.42, 0.16);
+    body(); ctx.fillStyle = paintGrad(-0.08, 1.34, "#e6c766", "#fbe892", "#fae28c"); ctx.fill();
+    clipped(body, () => { ctx.fillStyle = "#2b9c82"; ctx.fillRect(-2.3, 0.16, 4.7, 0.24); ctx.fillStyle = "#1e7a65"; ctx.fillRect(-2.3, 0.12, 4.7, 0.04); });
+    body(); ctx.lineWidth = 0.06; ctx.strokeStyle = C.ink; ctx.stroke();
+    // A row of windows with white-haired passengers
+    for (let k = 0; k < 5; k++) {
+      const wx = -2.08 + k * 0.72, win = () => rr(wx, 0.62, 0.6, 0.5, 0.05);
+      win(); ctx.fillStyle = glassGrad(0.62, 1.12); ctx.fill();
+      clipped(win, () => {
+        ctx.fillStyle = ["#b56a9e", "#6a8fb5", "#b58f6a", "#7ab56a", "#b56a6a"][k]; rr(wx + 0.14, 0.54, 0.32, 0.2, 0.07); ctx.fill();
+        ctx.fillStyle = "#f1c29c"; circle(wx + 0.3, 0.84, 0.1); ctx.fill();
+        ctx.fillStyle = "#e9edf0"; ctx.beginPath(); ctx.arc(wx + 0.3, 0.87, 0.115, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = C.ink; circle(wx + 0.35, 0.83, 0.014); ctx.fill();
+      });
+      win(); ctx.lineWidth = 0.04; ctx.strokeStyle = C.ink; ctx.stroke();
+    }
+    // Driver and windscreen
+    const win = () => polyPath([[1.56, 0.56], [2.22, 0.56], [2.2, 1.18], [1.56, 1.18]]);
+    win(); ctx.fillStyle = glassGrad(0.56, 1.18); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = C.blue; rr(1.64, 0.5, 0.38, 0.22, 0.07); ctx.fill(); personHead(1.84, 0.82, 0.115, "#1a4f95"); });
+    win(); ctx.lineWidth = 0.045; ctx.strokeStyle = C.ink; ctx.stroke();
+    lightBar(0.06, 1.34, 0.72);
+    inkBox(2.2, 0.24, 0.1, 0.14, 0.03, "#fff0a8", 0.03);
+    inkBox(-2.28, 0.46, 0.06, 0.22, 0.02, "#e0302f", 0.03);
+    inkBox(2.2, -0.2, 0.18, 0.16, 0.05, "#44505c", 0.04);
+    inkBox(-2.34, -0.2, 0.18, 0.16, 0.05, "#44505c", 0.04);
+  }
+
+  function drawBoatBody() {
+    // Trailer under the hull
+    inkBox(-1.42, -0.18, 2.84, 0.1, 0.03, "#5d6b78");
+    ctx.strokeStyle = "#5d6b78"; ctx.lineWidth = 0.07; ctx.beginPath(); ctx.moveTo(1.4, -0.14); ctx.lineTo(1.92, -0.28); ctx.stroke();
+    // Outboard motor
+    inkBox(-2.02, 0.02, 0.32, 0.5, 0.06, "#2b343d");
+    ctx.fillStyle = "#34404b"; ctx.fillRect(-1.92, -0.3, 0.1, 0.34);
+    // Hull
+    const hull = () => { ctx.beginPath(); ctx.moveTo(-1.7, 0.62); ctx.lineTo(1.95, 0.62); ctx.quadraticCurveTo(1.6, 0.14, 1.2, -0.02); ctx.lineTo(-1.62, -0.02); ctx.quadraticCurveTo(-1.72, 0.2, -1.7, 0.62); ctx.closePath(); };
+    hull(); ctx.fillStyle = paintGrad(-0.02, 0.62, "#c9520f", "#ff7f26", "#f06e1e"); ctx.fill();
+    clipped(hull, () => { ctx.fillStyle = "#ffffff"; ctx.fillRect(-1.8, 0.5, 3.8, 0.06); ctx.fillStyle = "#14212b"; ctx.fillRect(-1.8, -0.1, 3.8, 0.14); });
+    hull(); ctx.lineWidth = 0.06; ctx.strokeStyle = C.ink; ctx.stroke();
+    // Wheelhouse with the skipper, railing
+    inkBox(-0.85, 0.62, 1.0, 0.72, 0.06, "#ffffff", 0.055);
+    const win = () => rr(-0.24, 0.8, 0.34, 0.42, 0.04);
+    win(); ctx.fillStyle = glassGrad(0.8, 1.22); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = C.amber; rr(-0.2, 0.74, 0.26, 0.18, 0.06); ctx.fill(); personHead(-0.08, 1.0, 0.1, "#ffffff"); });
+    win(); ctx.lineWidth = 0.04; ctx.strokeStyle = C.ink; ctx.stroke();
+    medCross(-0.56, 1.0, 0.34);
+    lightBar(-0.72, 1.34, 0.74);
+    ctx.strokeStyle = "#c9d2db"; ctx.lineWidth = 0.035; ctx.beginPath(); ctx.moveTo(0.3, 0.62); ctx.lineTo(0.3, 0.92); ctx.lineTo(1.5, 0.92); ctx.lineTo(1.5, 0.62); ctx.moveTo(0.9, 0.62); ctx.lineTo(0.9, 0.92); ctx.stroke();
+    inkBox(1.78, 0.5, 0.12, 0.1, 0.03, "#fff0a8", 0.025);
+    // Life ring
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 0.09; circle(-1.25, 0.3, 0.14); ctx.stroke();
+  }
+
+  function drawLanderBody() {
+    // Thruster bell
+    inkPoly([[-0.2, -0.26], [0.2, -0.26], [0.34, -0.5], [-0.34, -0.5]], "#5d6b78");
+    // Foil descent stage
+    inkPoly([[-0.72, -0.18], [0.72, -0.18], [0.86, 0.08], [0.72, 0.36], [-0.72, 0.36], [-0.86, 0.08]], paintGrad(-0.18, 0.36, "#a57f22", "#f0cf63", "#dab246"));
+    ctx.strokeStyle = "rgba(20,33,43,0.25)"; ctx.lineWidth = 0.02; ctx.beginPath();
+    for (const lx of [-0.42, 0, 0.42]) { ctx.moveTo(lx, -0.16); ctx.lineTo(lx, 0.34); }
+    ctx.stroke();
+    // Crew capsule
+    const cap = () => polyPath([[-0.6, 0.36], [0.6, 0.36], [0.6, 0.78], [0.3, 1.16], [-0.3, 1.16], [-0.6, 0.78]]);
+    cap(); ctx.fillStyle = paintGrad(0.36, 1.16, "#dbe2ea", "#ffffff", "#f1f5f8"); ctx.fill(); ctx.lineWidth = 0.055; ctx.strokeStyle = C.ink; ctx.stroke();
+    const win = () => { circle(0.14, 0.74, 0.25); };
+    win(); ctx.fillStyle = glassGrad(0.5, 1); ctx.fill();
+    clipped(win, () => { ctx.fillStyle = "#e9edf0"; circle(0.14, 0.68, 0.16); ctx.fill(); ctx.fillStyle = "#2f4a68"; circle(0.19, 0.69, 0.1); ctx.fill(); });
+    win(); ctx.lineWidth = 0.04; ctx.strokeStyle = C.ink; ctx.stroke();
+    medCross(-0.32, 0.6, 0.24);
+    lightBar(-0.36, 1.16, 0.72);
+    // Antenna dish
+    ctx.strokeStyle = "#5d6b78"; ctx.lineWidth = 0.03; ctx.beginPath(); ctx.moveTo(-0.48, 0.92); ctx.lineTo(-0.72, 1.24); ctx.stroke();
+    ctx.fillStyle = "#c9d2db"; ctx.beginPath(); ctx.ellipse(-0.74, 1.26, 0.17, 0.07, -0.7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Landing legs out to the wheels
+    ctx.strokeStyle = "#9aa6b1"; ctx.lineWidth = 0.05; ctx.beginPath(); ctx.moveTo(-0.7, 0.05); ctx.lineTo(-1.05, -0.3); ctx.moveTo(0.7, 0.05); ctx.lineTo(1.05, -0.3); ctx.stroke();
+    inkBox(0.68, 0.34, 0.1, 0.12, 0.03, "#fff0a8", 0.025);
+  }
+
   function drawWheel(pose, R) {
     const p = pose, a = pose.a;
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a); ctx.scale(R / 0.42, R / 0.42);
@@ -3339,16 +4200,16 @@
     for (let i = 0; i < 16; i++) { ctx.save(); ctx.rotate((i / 16) * Math.PI * 2); ctx.fillRect(r - 0.07, -0.035, 0.06, 0.07); ctx.restore(); }
     ctx.strokeStyle = "#323c46"; ctx.lineWidth = 0.04; circle(0, 0, r * 0.8); ctx.stroke();
     const rim = ctx.createLinearGradient(-0.25, 0.25, 0.25, -0.25);
-    if (VEH.id === "police") { rim.addColorStop(0, "#3a444e"); rim.addColorStop(0.5, "#6b7782"); rim.addColorStop(1, "#46515c"); }
+    if (VEH.rim === "dark") { rim.addColorStop(0, "#3a444e"); rim.addColorStop(0.5, "#6b7782"); rim.addColorStop(1, "#46515c"); }
     else { rim.addColorStop(0, "#9aa6b1"); rim.addColorStop(0.5, "#f2f5f8"); rim.addColorStop(1, "#b9c3cc"); }
     ctx.fillStyle = rim; circle(0, 0, 0.25); ctx.fill(); ctx.lineWidth = 0.035; ctx.strokeStyle = C.ink; ctx.stroke();
-    ctx.fillStyle = VEH.id === "fire" ? C.red : "#5d6b78";
+    ctx.fillStyle = VEH.bolts || "#5d6b78";
     for (let i = 0; i < 5; i++) { const t = (i / 5) * Math.PI * 2; circle(Math.cos(t) * 0.15, Math.sin(t) * 0.15, 0.04); ctx.fill(); }
-    ctx.fillStyle = VEH.id === "police" ? "#c9d2db" : "#2b343d"; circle(0, 0, 0.065); ctx.fill();
+    ctx.fillStyle = VEH.rim === "dark" ? "#c9d2db" : "#2b343d"; circle(0, 0, 0.065); ctx.fill();
     ctx.restore();
   }
 
-  const BEACON_COLORS = { ambulance: [[255, 70, 70], [70, 150, 255]], police: [[255, 70, 70], [70, 150, 255]], fire: [[255, 60, 50], [255, 190, 60]] };
+  const BEACON_COLORS = [[255, 70, 70], [70, 150, 255]];
   function glowAt(x, y, r, c, a) {
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, rgba(c, a)); g.addColorStop(1, rgba(c, 0));
@@ -3362,7 +4223,7 @@
     for (const gl of glows) glowAt(gl.x, gl.y, gl.r, gl.c, gl.a);
     if (car.blown || (run && run.heli)) { ctx.restore(); return; }
     const phase = beaconPhase(), night = clamp(pal.night, 0, 1);
-    const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
+    const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = VEH.beaconCols || BEACON_COLORS;
     const lamp = wpt(P, bx, by);
     glowAt(lamp.x, lamp.y, 1.2 + night * 1.6, phase ? cols[0] : cols[1], 0.38 + night * 0.35);
     const hl = wpt(P, VEH.headlight[0], VEH.headlight[1]);
@@ -3375,7 +4236,7 @@
   function drawLightCores(pal) {
     if (car.blown || (run && run.heli)) return;
     const P = carPose(), phase = beaconPhase(), night = clamp(pal.night, 0, 1);
-    const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = BEACON_COLORS[VEH.id];
+    const [bx, by] = VEH.beacons[phase ? 0 : 1], cols = VEH.beaconCols || BEACON_COLORS;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     const lamp = wpt(P, bx, by);
@@ -3440,7 +4301,7 @@
     const r = compact ? 30 : clamp(W * 0.045, 36, 52);
     const maxKmh = Math.ceil((car.stats.topKmh * 1.3) / 20) * 20;
     // Second gauge: the patient's heart rate in the ambulance, the nitro or water charge otherwise
-    const g2 = VEH.gauge === "hr" ? [run.hr, 200, "Patient HR", 150] : [run.ability * 100, 100, VEH.gauge === "nitro" ? "Nitro %" : "Water %", 100];
+    const g2 = VEH.gauge === "hr" ? [run.hr, 200, "Patient HR", 150] : [run.ability * 100, 100, { nitro: "Nitro %", water: "Water %", thrust: "Thrust %" }[VEH.gauge], 100];
     let cx, cy;
     if (compact && H > W) {
       cy = H - 175 - r; cx = W / 2;
@@ -3510,6 +4371,22 @@
     if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * (reduceMotion ? 0.3 : 0.7)})`; ctx.fillRect(0, 0, W, H); }
   }
 
+  // The Reset countdown takes the middle of the screen so viewers can see it
+  function drawResetTimer() {
+    if (!run || run.resetLeft <= 0 || (state !== "drive" && state !== "paused")) return;
+    const left = Math.ceil(run.resetLeft), urgent = left <= 10, frac = run.resetLeft - Math.floor(run.resetLeft);
+    const size = clamp(Math.min(W, H) * 0.34, 96, 280) * (urgent ? 1 + 0.08 * frac : 1), cy = H * 0.46;
+    ctx.save();
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+    ctx.font = `${Math.round(size * 0.24)}px ${F_DISPLAY}`;
+    ctx.lineWidth = size * 0.06; ctx.strokeStyle = C.ink; ctx.strokeText("RESET IN", W / 2, cy - size * 0.68);
+    ctx.fillStyle = "#ffffff"; ctx.fillText("RESET IN", W / 2, cy - size * 0.68);
+    ctx.font = `${size}px ${F_DISPLAY}`;
+    ctx.lineWidth = size * 0.16; ctx.strokeText(String(left), W / 2, cy);
+    ctx.fillStyle = urgent ? "#ff5a5a" : C.gold; ctx.fillText(String(left), W / 2, cy);
+    ctx.restore();
+  }
+
   // A copy of the last frame, faded out over the new scene after a viewer swap
   let fadeShot = null;
   function captureFade() {
@@ -3557,16 +4434,19 @@
     drawDecor(pal);
     drawMarkers(pal);
     drawTerrain(pal);
+    drawZonesBack(pal);
     drawPickups(pal);
     drawFires(pal);
     drawGlows(pal);
     if (run && run.heli) drawHelicopter(pal); else { drawCar(pal); drawCage(); }
+    drawZonesFront(pal);
     drawParticles(pal);
     drawLightCores(pal);
     screenTransform();
     drawWeather(pal);
     drawOverlays();
     drawGauges();
+    drawResetTimer();
     drawPopups();
     drawFade();
     drawIris();
@@ -3632,12 +4512,10 @@
     $("o2-icon").innerHTML = VEH.res === "o2" ? "<span>O<small>2</small></span>" : `<svg viewBox="0 0 32 32" aria-hidden="true" style="color:#fff"><use href="#i-fuel"/></svg>`;
     const ab = $("t-ability");
     ab.hidden = !VEH.ability;
-    $("hint-ability").hidden = !VEH.ability;
     if (VEH.ability) {
       const water = VEH.ability === "water";
       $("ab-icon").setAttribute("href", water ? "#i-water" : "#i-nitro");
-      ab.setAttribute("aria-label", water ? "Water cannon" : "Nitro");
-      $("hint-ability-name").textContent = water ? "water cannon" : "nitro";
+      ab.setAttribute("aria-label", { water: "Water cannon", nitro: "Nitro", thrust: "Thrusters" }[VEH.ability]);
       $("ab-fill").style.transform = "scaleY(1)";
     }
     for (const k in hudCache) delete hudCache[k];
@@ -3685,7 +4563,7 @@
     speed: (v, up) => sv(v, "speed", up.engine) * v.wheelR,
     power: (v, up) => (sv(v, "torque", up.engine) * v.wheels.length) / v.wheelR,   // pulling force at the wheels
     grip: (v, up) => sv(v, "grip", up.tires),
-    tank: (v, up) => sv(v, "tank", up.tank),
+    tank: (v) => v.st.tank[0],
     air: (v) => v.tilt[1] * v.spin,
     weight: (v) => estMass(v),
   };
@@ -3700,7 +4578,7 @@
     for (let x = 0; x <= 900; x += 9) { xs.push(x); hs.push(x < 20 ? 0 : m.height(x) * smooth(20, 75, x)); }
     const lo = Math.min(...hs), hi = Math.max(...hs);
     const pts = xs.map((x, i) => `${(x / 900) * 200},${(58 - ((hs[i] - lo) / (hi - lo || 1)) * 30).toFixed(1)}`).join(" ");
-    const sky = m.station === "moon"
+    const sky = m.noSun ? "" : m.station === "moon"
       ? `<circle cx="168" cy="16" r="8" fill="#3d8de0"/><path d="M163 13q4-3 7 1-3 4-7 2z" fill="#5fb35a"/>`
       : `<circle cx="168" cy="16" r="7" fill="${b0.sun}"/>`;
     const far = `<path d="M0 44 Q30 ${m.id === "volcano" ? 10 : 30} 60 40 T120 36 T200 38 V64 H0Z" fill="${b0.far}" opacity="0.9"/>`;
@@ -3804,7 +4682,7 @@
         .map(([lab, k]) => `<span>${lab}</span><span class="bar"><i style="width:${Math.round((BAR[k](c, u2) / barMax[k]) * 100)}%"></i></span>`).join("");
       return `<article class="pick${selected ? " sel" : ""}" data-car="${c.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${c.name}">
         <div class="pick-art"><svg viewBox="0 0 64 32" aria-hidden="true"><use href="#${c.icon}"/></svg></div>
-        <div><h3>${c.name}${selected ? ' <span class="badge">Selected</span>' : ""} <span class="key" title="Live swap key">${i + 1}</span></h3>
+        <div><h3>${c.name}${selected ? ' <span class="badge">Selected</span>' : ""}</h3>
           <p class="pick-perk"><span class="mod">${c.role}</span> ${c.traits}</p><p class="pick-perk">${c.perk}</p><div class="bars">${bars}</div></div>
       </article>`;
     }).join("");
@@ -3815,7 +4693,7 @@
       const mods = mm.mods.map(([t, k]) => `<span class="mod ${k}">${t}</span>`).join("");
       return `<article class="pick${selected ? " sel" : ""}" data-map="${mm.id}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${mm.name}">
         <div class="pick-art">${mapThumb(mm)}</div>
-        <div><h3>${mm.name}${selected ? ' <span class="badge">Selected</span>' : ""} <span class="key" title="Live swap key">${i + 4}</span></h3>
+        <div><h3>${mm.name}${selected ? ' <span class="badge">Selected</span>' : ""}</h3>
           <p class="pick-perk">${mm.blurb}</p><div class="mods">${mods}</div></div>
         <p class="pick-perk">Best <b>${fmt(save.best[mm.id])} m</b></p></article>`;
     }).join("");
@@ -3872,7 +4750,7 @@
   }
 
   // ---------- Audio (all synthesized) ----------
-  let actx = null, master, sfxBus, musicBus, echo, noiseBuf, eng = null, sir = null, hiss = null, rpmS = 0;
+  let actx = null, master, sfxBus, musicBus, echo, noiseBuf, eng = null, sir = null, hiss = null, rotor = null, rpmS = 0;
   // Each vehicle has its own siren pattern and engine note
   function setVoices() {
     if (!actx || !sir) return;
@@ -3931,6 +4809,25 @@
         sp.connect(spf).connect(spg).connect(sfxBus);
         sp.start();
         hiss = { spg };
+
+        // Helicopter: the thump of the rotor blades over a turbine whine, only heard while flying
+        const hg = actx.createGain(); hg.gain.value = 0; hg.connect(sfxBus);
+        const chop = actx.createGain(); chop.gain.value = 0.55; chop.connect(hg);
+        const beat = actx.createOscillator(); beat.type = "square"; beat.frequency.value = 11;
+        const soften = actx.createBiquadFilter(); soften.type = "lowpass"; soften.frequency.value = 45;
+        const beatAmt = actx.createGain(); beatAmt.gain.value = 0.5;
+        beat.connect(soften).connect(beatAmt).connect(chop.gain);
+        const wash = actx.createBufferSource(); wash.buffer = noiseBuffer(); wash.loop = true;
+        const washF = actx.createBiquadFilter(); washF.type = "lowpass"; washF.frequency.value = 520;
+        wash.connect(washF).connect(chop);
+        const thump = actx.createOscillator(); thump.type = "sine"; thump.frequency.value = 64;
+        const thumpG = actx.createGain(); thumpG.gain.value = 0.9;
+        thump.connect(thumpG).connect(chop);
+        const whine = actx.createOscillator(); whine.type = "triangle"; whine.frequency.value = 1450;
+        const whineG = actx.createGain(); whineG.gain.value = 0.035;
+        whine.connect(whineG).connect(hg);
+        beat.start(); wash.start(); thump.start(); whine.start();
+        rotor = { hg, beat, whine };
         setVoices();
 
         music.next = actx.currentTime + 0.1;
@@ -4029,11 +4926,11 @@
     },
   };
 
-  let chopAt = 0;   // next helicopter rotor beat
   function updateAudio(rdt) {
     if (!actx) return;
     const t = actx.currentTime;
-    const on = (state === "drive" || state === "crash") && !save.muted;
+    const flying = !!(run && run.heli) && state === "drive" && !save.muted;
+    const on = (state === "drive" || state === "crash") && !save.muted && !flying;   // no engine noise under the rotors
     let throttle = 0, rpm = 0;
     if (on && run) {
       const hasO2 = run.o2 > 0;
@@ -4050,9 +4947,10 @@
     eng.f.frequency.setTargetAtTime(E.cutoff + rpmS * 1300 + throttle * 450 + boost * 600, t, 0.05);
     eng.g.gain.setTargetAtTime(on ? (state === "crash" ? 0 : 0.03 + throttle * 0.045 + rpmS * 0.015 + boost * 0.02) : 0, t, state === "crash" ? 0.2 : 0.06);
     eng.rg.gain.setTargetAtTime(on && state === "drive" ? E.rumble + rpmS * 0.08 : 0, t, 0.08);
-    if (run && run.heli && state === "drive" && t >= chopAt) { chopAt = t + 0.085; noise(0.06, { vol: 0.24, type: "lowpass", freq: 650, to: 220 }); }
+    rotor.hg.gain.setTargetAtTime(flying ? 0.34 : 0, t, flying ? 0.25 : 0.12);
+    if (flying) { const k = run.heli.v / SEND_SPEED; rotor.beat.frequency.setTargetAtTime(10 + k * 4, t, 0.3); rotor.whine.frequency.setTargetAtTime(1300 + k * 500, t, 0.3); }
     hiss.spg.gain.setTargetAtTime(on && state === "drive" && run && run.spraying ? 0.09 : 0, t, 0.05);
-    const sirenOn = state === "drive" && run && (run.siren || realNow < run.sirenUntil) && !save.muted;
+    const sirenOn = state === "drive" && run && !flying && (run.siren || realNow < run.sirenUntil) && !save.muted;
     sir.sg.gain.setTargetAtTime(sirenOn ? 0.035 : 0, t, 0.05);
   }
 
@@ -4117,11 +5015,14 @@
   function clearInput() { input.gas = input.brake = input.back = input.fwd = input.ability = false; document.querySelectorAll(".down").forEach((e) => e.classList.remove("down")); }
   const KEYMAP = { KeyD: "gas", KeyA: "brake", ArrowLeft: "back", ArrowRight: "fwd", KeyW: "ability", ArrowUp: "ability", ShiftLeft: "ability", ShiftRight: "ability" };
   const LIVE_KEYS = {
-    KeyV: nextVehicle, KeyB: nextMap,
-    KeyF: () => changeFuel(2), KeyG: () => changeFuel(-2), KeyJ: () => putInJail(), KeyK: kaboom, KeyR: startHelicopter, KeyO: toggleAuto,
+    KeyU: () => send(1000), KeyB: () => send(5000), KeyV: () => send(10000),
+    KeyJ: () => send(-1000), KeyN: () => send(-5000), KeyG: () => send(-10000),
+    KeyC: randomVehicle, KeyM: randomMap,
+    KeyF: () => changeFuel(2), KeyT: () => changeFuel(-2),
+    KeyI: () => putInJail(), KeyK: kaboom,
+    KeyR: startReset, KeyS: saveRun, KeyL: resetEverything,
+    KeyO: toggleAuto,
   };
-  VEHICLES.forEach((v, i) => { LIVE_KEYS["Digit" + (i + 1)] = LIVE_KEYS["Numpad" + (i + 1)] = () => requestSwap(v.id, null); });
-  MAPS.forEach((m, i) => { LIVE_KEYS["Digit" + (i + 4)] = LIVE_KEYS["Numpad" + (i + 4)] = () => requestSwap(null, m.id); });
   window.addEventListener("keydown", (e) => {
     if (!$("confirm-reset").hidden) { if (e.code === "Escape") closeReset(); return; }   // the dialog swallows game keys
     if (LIVE_KEYS[e.code]) { if (!e.repeat) LIVE_KEYS[e.code](); return; }
@@ -4136,8 +5037,8 @@
     if (e.repeat) return;
     if (e.code === "Escape" || e.code === "KeyP") { if (state === "drive") pause(); else if (state === "paused") resume(); }
     else if (e.code === "KeyH" && state === "drive") toggleSiren();
-    else if (e.code === "KeyM") { audio(); setMuted(!save.muted); }
-    else if (e.code === "KeyN") { audio(); setMusic(!save.music); }
+    else if (e.code === "Digit9" || e.code === "Numpad9") { audio(); setMuted(!save.muted); }
+    else if (e.code === "Digit0" || e.code === "Numpad0") { audio(); setMusic(!save.music); }
     else if (e.code === "Enter" || e.code === "Space") {
       if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
       if (state === "drive" && run.o2 <= 0 && !run.heli) { e.preventDefault(); giveUp(); return; }
